@@ -130,14 +130,14 @@
 
 
 <section id="section" class="slide level2"
-data-background-image="front.png">
-<h2 data-background-image="front.png"></h2>
+data-background-image="img/front.png">
+<h2 data-background-image="img/front.png"></h2>
 </section>
 <section id="about-me" class="title-slide slide level1">
 <h1>about me</h1>
 <div class="columns">
 <div class="column" style="width:50%;">
-<p><img data-src="me.jpg" style="width:75.0%" /></p>
+<p><img data-src="img/me.jpg" style="width:75.0%" /></p>
 </div><div class="column" style="width:50%;">
 <ul>
 <li>Software and Data Engineering Freelancer
@@ -262,7 +262,7 @@ price</li>
 </section>
 <section class="slide level2">
 
-<p><img data-src="orderbook_btc_usd.jpg" /></p>
+<p><img data-src="img/orderbook_btc_usd.jpg" /></p>
 </section>
 <section id="trades-and-positions" class="slide level2">
 <h2>trades and positions</h2>
@@ -347,7 +347,7 @@ possible)</li>
 </section>
 <section class="slide level2">
 
-<p><img data-src="high_level_architecture.png"
+<p><img data-src="img/high_level_architecture.png"
 style="width:80.0%" /></p>
 </section></section>
 <section>
@@ -377,7 +377,7 @@ class="title-slide slide level1">
 </section>
 <section class="slide level2">
 
-<p><img data-src="high_level_architecture_marketdata.png"
+<p><img data-src="img/high_level_architecture_marketdata.png"
 style="width:80.0%" /></p>
 </section>
 <section id="general" class="slide level2">
@@ -387,8 +387,8 @@ style="width:80.0%" /></p>
 <li>one orderbook per traded good</li>
 <li>essential for implementing trading strategies as current prices and
 quantities are provided</li>
-<li>mostly available as data streams (e.g. via websockets, TCP or
-UDP)</li>
+<li>mostly available as unidirectional data streams (e.g. via
+websockets, TCP or UDP)</li>
 <li>different types of data
 <ul>
 <li><strong>level 1</strong> (or top of book) data: currently best buy
@@ -405,7 +405,7 @@ and is usually most expensive</li>
 </section>
 <section class="slide level2">
 
-<p><img data-src="orderbook_btc_usd.jpg" /></p>
+<p><img data-src="img/orderbook_btc_usd.jpg" /></p>
 </section>
 <section id="marketdata-ingestion" class="slide level2">
 <h2>marketdata ingestion</h2>
@@ -573,7 +573,7 @@ class="title-slide slide level1">
 <section class="slide level2">
 
 <p><img
-data-src="high_level_architecture_serialization_communication.png"
+data-src="img/high_level_architecture_serialization_communication.png"
 style="width:80.0%" /></p>
 </section>
 <section class="slide level2">
@@ -628,8 +628,8 @@ role="doc-noteref"><sup>9</sup></a></p>
 <li>database (postgres, mysql, …)</li>
 </ul>
 </section>
-<section id="msgpack-via-kafka" class="slide level2">
-<h2>msgpack via kafka</h2>
+<section id="messagepack-via-kafka" class="slide level2">
+<h2>messagepack via kafka</h2>
 </section>
 <section id="why-kafka" class="slide level2">
 <h2>why kafka</h2>
@@ -643,8 +643,10 @@ role="doc-noteref"><sup>9</sup></a></p>
 <li>established
 <ul>
 <li>support in all (big) programming languages exist ➡️ consumer and
-producer are language independent</li>
-<li>can be used as managed service</li>
+producer are language independent (used kafka-python<a href="#/fn10"
+class="footnote-ref" id="fnref10"
+role="doc-noteref"><sup>10</sup></a>)</li>
+<li>can be used as managed service in cloud</li>
 <li>many people with experience ➡️ easier to hire</li>
 </ul></li>
 <li>resilient</li>
@@ -662,8 +664,8 @@ producer are language independent</li>
 </ul></li>
 </ul>
 </section>
-<section id="why-msgpack" class="slide level2">
-<h2>why msgpack</h2>
+<section id="why-messagepack" class="slide level2">
+<h2>why messagepack</h2>
 <aside class="notes">
 <ul>
 <li>of course not established as JSON</li>
@@ -677,8 +679,9 @@ producer are language independent</li>
 <li>fast</li>
 <li>established
 <ul>
-<li>support in all (big) programming languages exist ➡️ consumer and
-producer are language independent</li>
+<li>support in all (big) programming languages exist (used ormsgpack<a
+href="#/fn11" class="footnote-ref" id="fnref11"
+role="doc-noteref"><sup>11</sup></a> for python)</li>
 <li>backed and used by big products like redis, fluentd, pinterest</li>
 </ul></li>
 </ul>
@@ -686,18 +689,137 @@ producer are language independent</li>
 <section id="resulting-architecture" class="slide level2">
 <h2>resulting architecture</h2>
 <figure>
-<img data-src="high_level_architecture_kafka.png" style="width:80.0%"
-alt="" />
-<figcaption aria-hidden="true"><a href="#/fn10" class="footnote-ref"
-id="fnref10" role="doc-noteref"><sup>10</sup></a></figcaption>
+<img data-src="img/high_level_architecture_kafka.png"
+style="width:80.0%" alt="" />
+<figcaption aria-hidden="true"><a href="#/fn12" class="footnote-ref"
+id="fnref12" role="doc-noteref"><sup>12</sup></a></figcaption>
 </figure>
 </section></section>
+<section>
 <section id="order-management-and-execution"
 class="title-slide slide level1">
 <h1>order management and execution</h1>
 
 </section>
+<section class="slide level2">
 
+<p><img data-src="img/high_level_architecture_kafka_order_execution.png"
+style="width:80.0%" /></p>
+</section>
+<section id="sending-orders" class="slide level2">
+<h2>sending orders</h2>
+<ul>
+<li>trading strategies should be able to send orders to different
+exchanges</li>
+<li>different exchanges have different protocols for sending orders</li>
+<li>decoupling of trading system from exchanges by normalizing order
+sending via adapter pattern<a href="#/fn13" class="footnote-ref"
+id="fnref13" role="doc-noteref"><sup>13</sup></a></li>
+</ul>
+</section>
+<section id="general-order-execution" class="slide level2">
+<h2>general order execution</h2>
+<ul>
+<li>also sometimes called private data</li>
+<li>bidirectional - either send/receive via same or separate channels
+<ul>
+<li>proprietary TCP</li>
+<li>input via HTTP/REST, feedback via websocket</li>
+</ul></li>
+</ul>
+</section>
+<section id="order-execution-engine" class="slide level2">
+<h2>➡️ order execution engine</h2>
+<ul>
+<li>similar to marketdata adapter, but for outgoing orders (adapter
+pattern used)</li>
+<li>receives normalized order action from strategy</li>
+<li>per exchange
+<ul>
+<li>converts normalized order action to exchange format</li>
+<li>sends order action to exchange</li>
+<li>receives order feedback from exchange</li>
+<li>normalizes order feedback from exchange</li>
+</ul></li>
+<li>sends order action feedback to strategy</li>
+</ul>
+</section>
+<section id="order-actions" class="slide level2">
+<h2>order actions</h2>
+<ul>
+<li>depending on order type and market, order actions and feedback can
+vary</li>
+<li>common order actions for orderbook trading
+<ul>
+<li>place new order</li>
+<li>modify order price or quantity of active order</li>
+<li>cancel active order</li>
+</ul></li>
+<li>common feedback for orderbook trading
+<ul>
+<li>action confirmations
+<ul>
+<li>new</li>
+<li>modify</li>
+<li>cancelled</li>
+</ul></li>
+<li>trades, also called fills - order was ful<em>filled</em></li>
+<li>cancellations by exchange - can occur due to various reasons like
+market outages or compliance</li>
+</ul></li>
+</ul>
+</section>
+<section id="kraken-derivatives-order-execution" class="slide level2">
+<h2>Kraken derivatives order execution</h2>
+<ul>
+<li>placement of orders via REST
+<ul>
+<li>different endpoints for different actions</li>
+<li>expects JSON as input</li>
+</ul></li>
+<li>feedback via websocket or REST polling ➡️ for proof of concept
+websocket was selected
+<ul>
+<li>same websocket endpoint as for marketdata adapter</li>
+<li>on connect a <em>snapshot</em> of the subscribed data is
+received</li>
+<li>consecutive messages are <em>deltas</em>: what changes to data
+ocurred compared to previous message</li>
+</ul></li>
+<li>order actions received from strategies are converted and forwarded
+to exchange</li>
+<li>feedback received from exchange is normalized and forwarded to
+strategies</li>
+</ul>
+</section>
+<section id="todo-add-code-and-json-excerpts" class="slide level2">
+<h2>TODO: add code and JSON excerpts</h2>
+</section>
+<section id="order-handling-caveats" class="slide level2">
+<h2>order handling caveats</h2>
+<ul>
+<li>order actions can fail for various reasons
+<ul>
+<li>cancel for already filled order</li>
+<li>modify for already filled order</li>
+<li>modify for already cancelled order (by exchange)</li>
+</ul></li>
+<li>due to distributed nature and latency to exchange, strategies might
+react too late ➡️ low latency helps up to a certain point</li>
+<li>most exchanges have rate limits
+<ul>
+<li>limit possible actions per time period</li>
+<li>punish you if you try too often to violate them</li>
+<li>➡️ paying more for higher rate limits or multiple accounts might
+help (if allowed)</li>
+</ul></li>
+<li>order execution engine can also keep track of orders to
+<ul>
+<li>act proactively (e.g. don’t send cancel for filled order)</li>
+<li>keep track of rate limits and allow cancels in emergencies</li>
+</ul></li>
+</ul>
+</section></section>
 <section id="implementation-of-trading-strategies"
 class="title-slide slide level1">
 <h1>implementation of trading strategies</h1>
@@ -754,8 +876,20 @@ href="https://isocpp.org/wiki/faq/serialization">Serialization, accessed
 2025-04-13, 16:40</a></em><a href="#/fnref9" class="footnote-back"
 role="doc-backlink">↩︎</a></p></li>
 <li id="fn10"><p><em><a
+href="https://github.com/dpkp/kafka-python">kafka-python, accessed
+2025-04-13 16:50</a></em><a href="#/fnref10" class="footnote-back"
+role="doc-backlink">↩︎</a></p></li>
+<li id="fn11"><p><em><a
+href="https://github.com/aviramha/ormsgpack">ormsgpack, accessed
+2025-04-13 16:50</a></em><a href="#/fnref11" class="footnote-back"
+role="doc-backlink">↩︎</a></p></li>
+<li id="fn12"><p><em><a
 href="https://de.m.wikipedia.org/wiki/Datei:Apache_Kafka_logo.svg">kafka
-logo, accessed 2025-04-13 17:51</a></em><a href="#/fnref10"
+logo, accessed 2025-04-13 17:51</a></em><a href="#/fnref12"
+class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn13"><p><em><a
+href="https://refactoring.guru/design-patterns/adapter">Adapter design
+pattern, accessed 2025-04-12, 19:40</a></em><a href="#/fnref13"
 class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 </ol>
 </section>

@@ -1,16 +1,16 @@
 ---
 title: 
 title-slide-attributes:
-    data-background-image: "front.png"
+    data-background-image: "img/front.png"
     data-background-size: contain
 ---
 
-## {background-image="front.png"}
+## {background-image="img/front.png"}
 
 # about me
 :::::::::::::: {.columns}
 ::: {.column width="50%"}
-![](me.jpg){width=75%}
+![](img/me.jpg){width=75%}
 :::
 ::: {.column width="50%"}
 - Software and Data Engineering Freelancer
@@ -91,7 +91,7 @@ title-slide-attributes:
 
 ---
 
-![](orderbook_btc_usd.jpg)
+![](img/orderbook_btc_usd.jpg)
 
 ## trades and positions
 - **trade**: an order that was *executed* ➡️ somebody else matched your order and you actually bought/sold a good
@@ -149,7 +149,7 @@ I need for being sufficiently fast to
 
 ---
 
-![](high_level_architecture.png){ width=80% }
+![](img/high_level_architecture.png){ width=80% }
 
 # disclaimer
 
@@ -172,7 +172,7 @@ most exchanges have a simulation environment, that can be used for testing - als
 
 ---
 
-![](high_level_architecture_marketdata.png){ width=80% }
+![](img/high_level_architecture_marketdata.png){ width=80% }
 
 ---
 
@@ -181,7 +181,7 @@ most exchanges have a simulation environment, that can be used for testing - als
 - also called public data
 - one orderbook per traded good
 - essential for implementing trading strategies as current prices and quantities are provided
-- mostly available as data streams (e.g. via websockets, TCP or UDP)
+- mostly available as unidirectional data streams (e.g. via websockets, TCP or UDP)
 - different types of data
   - **level 1** (or top of book) data: currently best buy (highest) and sell (lowest) offer
   - **level 2** data: excerpt from orderbook with top n levels
@@ -191,7 +191,7 @@ most exchanges have a simulation environment, that can be used for testing - als
 
 ---
 
-![](orderbook_btc_usd.jpg)
+![](img/orderbook_btc_usd.jpg)
 
 ## marketdata ingestion
 
@@ -354,7 +354,7 @@ class BookDelta(BookBase):
 
 --- 
 
-![](high_level_architecture_serialization_communication.png){ width=80% }
+![](img/high_level_architecture_serialization_communication.png){ width=80% }
 
 ---
 
@@ -403,7 +403,7 @@ possible candidates
 - event streaming or message broker (kafka, rabbitmq, ...)
 - database (postgres, mysql, ...)
 
-## msgpack via kafka
+## messagepack via kafka
 
 ## why kafka
 
@@ -415,8 +415,8 @@ possible candidates
 
 - fast
 - established
-  - support in all (big) programming languages exist ➡️ consumer and producer are language independent
-  - can be used as managed service
+  - support in all (big) programming languages exist ➡️ consumer and producer are language independent (used kafka-python[^10])
+  - can be used as managed service in cloud
   - many people with experience ➡️ easier to hire
 - resilient
 - messages can be replayed
@@ -428,7 +428,9 @@ possible candidates
   - no built-in mechanism to check whether consumers are gone
   - has to be operated as a separate service
 
-## why msgpack
+[^10]: _[kafka-python, accessed 2025-04-13 16:50](https://github.com/dpkp/kafka-python)_
+
+## why messagepack
 
 ::: notes
 
@@ -442,19 +444,119 @@ possible candidates
 - schemalass (e.g. in contrast to protobuf)
 - fast
 - established
-  - support in all (big) programming languages exist ➡️ consumer and producer are language independent
+  - support in all (big) programming languages exist (used ormsgpack[^11] for python)
   - backed and used by big products like redis, fluentd, pinterest
 
+[^11]: _[ormsgpack, accessed 2025-04-13 16:50](https://github.com/aviramha/ormsgpack)_
 
 ## resulting architecture
 
-![[^10]](high_level_architecture_kafka.png){ width=80% }
+![[^12]](img/high_level_architecture_kafka.png){ width=80% }
 
-[^10]: _[kafka logo, accessed 2025-04-13 17:51](https://de.m.wikipedia.org/wiki/Datei:Apache_Kafka_logo.svg)_
+[^12]: _[kafka logo, accessed 2025-04-13 17:51](https://de.m.wikipedia.org/wiki/Datei:Apache_Kafka_logo.svg)_
+
 
 # order management and execution
 
+---
+
+![](img/high_level_architecture_kafka_order_execution.png){ width=80% }
+
+---
+
+## sending orders
+
+- trading strategies should be able to send orders to different exchanges
+- different exchanges have different protocols for sending orders
+- decoupling of trading system from exchanges by normalizing order sending via adapter pattern[^7]
+
+## general order execution
+
+- also sometimes called private data
+- bidirectional - either send/receive via same or separate channels
+  - proprietary TCP
+  - input via HTTP/REST, feedback via websocket
+
+## ➡️ order execution engine
+
+- similar to marketdata adapter, but for outgoing orders (adapter pattern used) 
+- receives normalized order action from strategy
+- per exchange
+  - converts normalized order action to exchange format
+  - sends order action to exchange
+  - receives order feedback from exchange
+  - normalizes order feedback from exchange
+- sends order action feedback to strategy
+
+## order actions
+
+- depending on order type and market, order actions and feedback can vary
+- common order actions for orderbook trading
+  - place new order
+  - modify order price or quantity of active order
+  - cancel active order
+- common feedback for orderbook trading
+  - action confirmations
+    - new
+    - modify
+    - cancelled
+  - trades, also called fills - order was ful*filled*
+  - cancellations by exchange - can occur due to various reasons like market outages or compliance
+
+## Kraken derivatives order execution
+
+- placement of orders via REST
+  - different endpoints for different actions
+  - expects JSON as input
+- feedback via websocket or REST polling ➡️ for proof of concept websocket was selected
+  - same websocket endpoint as for marketdata adapter
+  - on connect a _snapshot_ of the subscribed data is received
+  - consecutive messages are _deltas_: what changes to data ocurred compared to previous message
+- order actions received from strategies are converted and forwarded to exchange
+- feedback received from exchange is normalized and forwarded to strategies
+
+---
+
+## TODO: add code and JSON excerpts
+
+---
+
+## order handling caveats
+
+- order actions can fail for various reasons
+  - cancel for already filled order
+  - modify for already filled order
+  - modify for already cancelled order (by exchange)
+- due to distributed nature and latency to exchange, strategies might react too late ➡️ low latency helps up to a certain point
+- most exchanges have rate limits
+  - limit possible actions per time period
+  - punish you if you try too often to violate them
+  - ➡️ paying more for higher rate limits or multiple accounts might help (if allowed)
+- order execution engine can also keep track of orders to 
+  - act proactively (e.g. don't send cancel for filled order)
+  - keep track of rate limits and allow cancels in emergencies
+
 # implementation of trading strategies
+
+---
+
+## TODO: add image of strategies
+
+---
+
+## trading strategies or algorithms
+
+- based on a signal a decision is made to act on a certain market
+- most important signals
+  - marktdata
+  - feedback for own orders
+  - own position
+  - for derivatives: forecasts of underlying assets
+- needs to be able to execute wanted actions on a market ➡️ order actions
+
+## implementation
+
+TODO
 
 # post-trade analysis
 

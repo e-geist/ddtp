@@ -21,8 +21,6 @@ from ddtp.api.kraken_derivatives.data import (
 )
 
 logger = logging.getLogger("kraken_deriv_marketdata_adapter")
-logger.setLevel(logging.DEBUG)
-
 
 def _get_marketdata_parser(queue: Queue) -> Callable[[dict[str, Any]], None]:
     def parse_marketdata_event(
