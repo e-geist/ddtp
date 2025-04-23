@@ -2,7 +2,7 @@ import logging
 from collections import defaultdict
 from decimal import Decimal
 
-from ddtp.marketdata.data import BookSnapshot, BookDelta, OrderBookSide, OrderBookEntry
+from ddtp.marketdata.data import BookSnapshot, BookDelta, OrderbookSide, OrderBookEntry
 
 
 class Orderbook:
@@ -64,7 +64,7 @@ class Orderbook:
         self.seq = delta.seq
         self.last_update = delta.timestamp
 
-        side_to_modify = self.bids if delta.side == OrderBookSide.BUY else self.asks
+        side_to_modify = self.bids if delta.side == OrderbookSide.BUY else self.asks
         if delta.qty == 0 and delta.price in side_to_modify:
             del side_to_modify[delta.price]
         else:
