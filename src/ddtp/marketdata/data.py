@@ -44,12 +44,14 @@ class BookBase(BaseMessage):
 
 
 class BookSnapshot(BookBase):
+    feed: FeedType = FeedType.BOOK_SNAPSHOT
     tickSize: Optional[Decimal]
-    bids: List[OrderBookEntry]
-    asks: List[OrderBookEntry]
+    bids: list[OrderBookEntry]
+    asks: list[OrderBookEntry]
 
 
 class BookDelta(BookBase):
+    feed: FeedType = FeedType.BOOK
     side: OrderBookSide
     price: Decimal
     qty: Decimal
@@ -70,14 +72,18 @@ class TradeData(BaseModel):
 
 
 class TradeSnapshot(TradeBase):
+    feed: FeedType = FeedType.TRADE_SNAPSHOT
     trades: list[TradeData]
 
 
 class TradeDelta(TradeBase, TradeData):
+    feed: FeedType = FeedType.TRADE
     pass
 
 
-def book_event_from_dict(event: dict[str, Any]) -> BookSnapshot | BookDelta | TradeSnapshot | TradeDelta:
+def book_event_from_dict(
+    event: dict[str, Any],
+) -> BookSnapshot | BookDelta | TradeSnapshot | TradeDelta:
     match event["feed"]:
         case FeedType.BOOK:
             return BookDelta(**event)

@@ -2,7 +2,13 @@ import logging
 from typing import Any
 
 from ddtp.marketdata.data import (
-    book_event_from_dict, BookBase, TradeBase, BookSnapshot, BookDelta, TradeSnapshot, TradeDelta,
+    book_event_from_dict,
+    BookBase,
+    TradeBase,
+    BookSnapshot,
+    BookDelta,
+    TradeSnapshot,
+    TradeDelta,
 )
 from ddtp.marketdata.orderbook import Orderbook
 from ddtp.serialization.config import KafkaTopics
@@ -11,17 +17,16 @@ from ddtp.serialization.consumer import consume_kafka_messages
 logger = logging.getLogger("main")
 
 SUBSCRIBED_INSTRUMENTS = {"PI_XBTUSD", "PI_ETHUSD"}
-books: dict[str, Orderbook] = {}
+books = dict[str, Orderbook]()
 
 
 def process_orderbook_event(event: BookSnapshot | BookDelta):
-
     book = books.get(event.product_id)
     if not book:
         book = Orderbook(event.product_id)
         books[event.product_id] = book
     book.apply_event(event)
-    logger.info(f"Book: {event.product_id}: {book}")
+    # logger.info(f"Book: {event.product_id}: {book}")
 
 
 def process_trade_event(event: TradeSnapshot | TradeDelta):
@@ -38,7 +43,6 @@ def consume_orderbook_event(instrument: str, event: dict[str, Any], timestamp: i
             process_orderbook_event(event)
         case TradeSnapshot() | TradeDelta():
             process_trade_event(event)
-
 
 
 def main():

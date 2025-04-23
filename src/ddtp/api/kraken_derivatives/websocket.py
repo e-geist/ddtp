@@ -59,7 +59,8 @@ class KrakenDerivWebSocket:
         self.api_secret = api_secret
         self.timeout = timeout
 
-        self.ws = None
+        self.ws: websocket.WebSocketApp | None = None
+        self.wst: Thread | None = None
         self.original_challenge = None
         self.signed_challenge = None
         self.challenge_ready = False
