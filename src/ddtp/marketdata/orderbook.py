@@ -47,7 +47,7 @@ class Orderbook:
             delta = self.held_back_updates.pop(0)
             self._apply_delta(delta)
 
-        self._logger.info(f"applying held back updates done!")
+        self._logger.info("applying held back updates done!")
 
     def _apply_delta(self, delta: BookDelta):
         if not self.is_initialized:
@@ -88,7 +88,9 @@ class Orderbook:
         return f"Bids: {bids_sorted}\nAsks: {asks_sorted}"
 
     def to_snapshot(self) -> BookSnapshot:
-        bids = [OrderBookEntry(price=price, qty=qty) for price, qty in self.bids.items()]
+        bids = [
+            OrderBookEntry(price=price, qty=qty) for price, qty in self.bids.items()
+        ]
         ask = [OrderBookEntry(price=price, qty=qty) for price, qty in self.asks.items()]
         return BookSnapshot(
             product_id=self.product_id,

@@ -8,7 +8,7 @@ from ddtp.marketdata.orderbook import Orderbook
 from ddtp.serialization.config import KafkaTopics
 from ddtp.serialization.producer import produce_message
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("marketdata_provider")
 
 books = dict[str, Orderbook]()
 sent_snapshots = dict[str, int]()
@@ -18,7 +18,10 @@ def main():
     logger.info("Starting Marketdata Provider")
     queue = mp.Queue()
 
-    p = Process(target=AvailableMarketdataAdapter.KRAKEN_DERIVATIVES, args=(["PI_XBTUSD", "PI_ETHUSD"], queue))
+    p = Process(
+        target=AvailableMarketdataAdapter.KRAKEN_DERIVATIVES,
+        args=(["PI_XBTUSD", "PI_ETHUSD"], queue),
+    )
     p.start()
 
     try:
@@ -56,6 +59,7 @@ def main():
     if p.is_alive():
         p.terminate()
         p.join()
+
 
 if __name__ == "__main__":
     main()

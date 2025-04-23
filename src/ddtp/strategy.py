@@ -3,8 +3,6 @@ from typing import Any
 
 from ddtp.marketdata.data import (
     book_event_from_dict,
-    BookBase,
-    TradeBase,
     BookSnapshot,
     BookDelta,
     TradeSnapshot,
@@ -14,7 +12,7 @@ from ddtp.marketdata.orderbook import Orderbook
 from ddtp.serialization.config import KafkaTopics
 from ddtp.serialization.consumer import consume_kafka_messages
 
-logger = logging.getLogger("main")
+logger = logging.getLogger("strategy")
 
 SUBSCRIBED_INSTRUMENTS = {"PI_XBTUSD", "PI_ETHUSD"}
 books = dict[str, Orderbook]()
@@ -26,11 +24,11 @@ def process_orderbook_event(event: BookSnapshot | BookDelta):
         book = Orderbook(event.product_id)
         books[event.product_id] = book
     book.apply_event(event)
-    # logger.info(f"Book: {event.product_id}: {book}")
+    logger.debug(f"Book: {event.product_id}: {book}")
 
 
 def process_trade_event(event: TradeSnapshot | TradeDelta):
-    logger.info(f"Trade: {event.product_id}: {event}")
+    logger.debug(f"Trade: {event.product_id}: {event}")
 
 
 def consume_orderbook_event(instrument: str, event: dict[str, Any], timestamp: int):

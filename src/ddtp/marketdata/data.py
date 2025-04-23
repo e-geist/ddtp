@@ -1,7 +1,8 @@
-from typing import List, Optional, Any
-from pydantic import BaseModel
 from decimal import Decimal
 from enum import StrEnum
+from typing import Optional, Any
+
+from pydantic import BaseModel
 
 
 class FeedType(StrEnum):
