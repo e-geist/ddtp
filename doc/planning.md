@@ -17,6 +17,7 @@
     * more control -> adapt what is not like you want it
     * more flexibility
 * interesting exercise with different technical challenges
+* job opportunities
 
 # Fundamental concepts
 * What is trading?
