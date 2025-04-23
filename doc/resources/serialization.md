@@ -6,19 +6,48 @@ https://developer.mozilla.org/en-US/docs/Glossary/Serialization (accessed 2025-0
 
 - transport between different processes or applications
 - storing data
-- examples: JSON, protobuf, msgpack, parquet, arrow (in-memory), pickle
+- examples: JSON, protobuf, msgpack, SBE, flatbuffers, parquet, arrow (in-memory), pickle
 
 # What do I need it for in a trading system?
-- communication between decoupled system components
-- storage of recorded data (e.g. market data)
+Main use cases:
+- Communication in live trading system between components
+- Storage of offline data
 
 # What do we need to pay attention at?
-Different requirements for different use-cases
+Different requirements for different use-cases. 
 
 ## Communication between decoupled system components
 - De-/Serialization speed: very import -> how fast can it be processed?
 - Storage size: mid important -> how much space does it take up in RAM + via network communication
-- Standardized protocol: depends -> is the techstack rather broard or narrow? support for many languages needed?
+- Standardized protocol: depends -> is the techstack rather broad or narrow? support for many languages needed?
+
+Decision: **msgpack** due to better language support for Python + decision against gRPC (otherwise protobuf
+would have been needed)
+
+### JSON
+Too big and too slow in serialization and deserialization.
+
+### Protocol buffers (protobuf)
+https://protobuf.dev/
+- by Google
+- good language support (all big programming languages)
+- has schema -> definition of objects in fbs file and compilation to python objects
+- serialization used in gRPC
+- slower compared to flatbuffers, faster than JSON and msgpack
+
+### Flatbuffers
+https://flatbuffers.dev
+- by Google
+- good language support (all big programming languages)
+- has schema -> definition of objects in proto file and compilation to python objects
+- faster than protobuf
+
+### Msgpack
+https://msgpack.org/
+- backed and used by big products like redis, fluentd, pinterest
+- schemaless
+- good language support (all big programming languages)
+- [ormsgpack](https://github.com/aviramha/ormsgpack) has good "Pythonic" support (dataclasses, tuples, lists,..)
 
 ## Storage of recorded data
 Here everything depends on the data volume. 
@@ -31,6 +60,14 @@ Rather small data volume: compliance data (sent orders, trades)
 - Storage size: very import for recorded data, because of huge volume / mid for compliance data
 - Standardized protocol: important to enable analysis + evaluation via different systems
 
+Decision: De-facto standard parquet due to very good support in all systems, versatility, space and speed.
+On top of parquet of course some table-format can (and probably should!) be used, like Apache Iceberg or Delta Lake.
+As this is a demo project, these were omitted.
+
 # Resources
 - https://medium.com/@hugovs/the-need-for-speed-experimenting-with-message-serialization-93d7562b16e4
 - https://medium.com/@shmulikamar/python-serialization-benchmarks-8e5bb700530b
+- https://protobuf.dev/
+- https://flatbuffers.dev/benchmarks/
+- https://msgpack.org/
+- https://github.com/aviramha/ormsgpack
