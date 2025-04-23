@@ -28,6 +28,71 @@
       vertical-align: middle;
     }
     .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
   </style>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.2.1/dist/theme/white.css" id="theme">
   <style>
@@ -202,11 +267,11 @@ price</li>
 <section id="trades-and-positions" class="slide level2">
 <h2>trades and positions</h2>
 <ul>
-<li><strong>trade</strong>: an order that was <em>executed</em> -&gt;
+<li><strong>trade</strong>: an order that was <em>executed</em> ➡️
 somebody else matched your order and you actually bought/sold a
 good</li>
 <li><strong>position</strong>: accumulation of all trades for one
-specific good -&gt; how much do I actually have of a good</li>
+specific good ➡️ how much do I actually have of a good</li>
 </ul>
 </section>
 <section id="summary" class="slide level2">
@@ -272,17 +337,17 @@ cancellations)</li>
 </section>
 <section class="slide level2">
 
-<p>I need for being sufficiently fast</p>
+<p>I need for being sufficiently fast to</p>
 <ul>
-<li>to structure my components independently to scale them</li>
-<li>pick fast technolgies</li>
+<li>structure my components independently to scale them</li>
+<li>pick fast technologies</li>
 <li>pick a location as close as possible to the exchanges (if
 possible)</li>
 </ul>
 </section>
 <section class="slide level2">
 
-<p><img data-src="high_level_architecture.drawio.png"
+<p><img data-src="high_level_architecture.png"
 style="width:80.0%" /></p>
 </section></section>
 <section>
@@ -312,7 +377,7 @@ class="title-slide slide level1">
 </section>
 <section class="slide level2">
 
-<p><img data-src="high_level_architecture_marketdata.drawio.png"
+<p><img data-src="high_level_architecture_marketdata.png"
 style="width:80.0%" /></p>
 </section>
 <section id="general" class="slide level2">
@@ -356,8 +421,11 @@ role="doc-noteref"><sup>7</sup></a></li>
 <section id="marketdata-adapter" class="slide level2">
 <h2>➡️ marketdata adapter</h2>
 <ul>
+<li>per exchange
+<ul>
 <li>receives marketdata from exchanges</li>
 <li>normalizes marketdata to internal representation</li>
+</ul></li>
 <li>forwards normalized marketdata to strategies</li>
 </ul>
 </section>
@@ -368,7 +436,8 @@ class="slide level2">
 <li>subscribes to marketdata for different instruments
 <ul>
 <li>via websocket</li>
-<li>exchange sends JSON</li>
+<li>exchange sends JSON (use orjson<a href="#/fn8" class="footnote-ref"
+id="fnref8" role="doc-noteref"><sup>8</sup></a> for fast parsing)</li>
 </ul></li>
 <li>L2 marketdata ➡️ orderbook levels
 <ul>
@@ -382,13 +451,247 @@ ocurred compared to previous message</li>
 <li>sends each N minutes a snapshot to the strategies</li>
 </ul></li>
 </ul>
+</section>
+<section class="slide level2">
+
+<h3 id="snapshot-message">Snapshot message</h3>
+<aside class="notes">
+<p>if somebody knows how to center this arrow in pandoc, please write me
+a message</p>
+</aside>
+<div class="columns" data-align="center">
+<div class="column" style="width:35%;">
+<p>kraken futures</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;feed&quot;</span><span class="fu">:</span> <span class="st">&quot;book_snapshot&quot;</span><span class="fu">,</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;product_id&quot;</span><span class="fu">:</span> <span class="st">&quot;PI_ETHUSD&quot;</span><span class="fu">,</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;timestamp&quot;</span><span class="fu">:</span> <span class="dv">1744550040435</span><span class="fu">,</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;seq&quot;</span><span class="fu">:</span> <span class="dv">528862</span><span class="fu">,</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;tickSize&quot;</span><span class="fu">:</span> <span class="kw">null</span><span class="fu">,</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;bids&quot;</span><span class="fu">:</span> <span class="ot">[</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>        <span class="fu">{</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>            <span class="dt">&quot;price&quot;</span><span class="fu">:</span> <span class="fl">1556.2</span><span class="fu">,</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>            <span class="dt">&quot;qty&quot;</span><span class="fu">:</span> <span class="fl">200.0</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>        <span class="fu">}</span><span class="ot">,</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    <span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    <span class="er">...</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;asks&quot;</span><span class="fu">:</span> <span class="ot">[</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>        <span class="fu">{</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>            <span class="dt">&quot;price&quot;</span><span class="fu">:</span> <span class="fl">1556.825</span><span class="fu">,</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>            <span class="dt">&quot;qty&quot;</span><span class="fu">:</span> <span class="fl">184.0</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>        <span class="fu">}</span><span class="ot">,</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>        <span class="er">...</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>    <span class="ot">]</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+</div><div class="column" style="width:5%;">
+<p>➡️</p>
+</div><div class="column" style="width:60%;">
+<p>internal representation</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> BaseMessage(BaseModel):</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    message_type: MessageType</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> BookBase(BaseMessage):</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    timestamp: <span class="bu">int</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    seq: <span class="bu">int</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    product_id: <span class="bu">str</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> OrderBookEntry(BaseModel):</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    price: Decimal</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    qty: Decimal</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> BookSnapshot(BookBase):</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>    message_type: MessageType <span class="op">=</span> MessageType.BOOK_SNAPSHOT</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>    tickSize: Optional[Decimal]</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>    bids: <span class="bu">list</span>[OrderBookEntry]</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>    asks: <span class="bu">list</span>[OrderBookEntry]</span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a></span></code></pre></div>
+</div>
+</div>
+</section>
+<section class="slide level2">
+
+<h3 id="delta-message">Delta message</h3>
+<div class="columns" data-align="center">
+<div class="column" style="width:35%;">
+<p>kraken futures</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;feed&quot;</span><span class="fu">:</span> <span class="st">&quot;book&quot;</span><span class="fu">,</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;product_id&quot;</span><span class="fu">:</span> <span class="st">&quot;PI_ETHUSD&quot;</span><span class="fu">,</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;side&quot;</span><span class="fu">:</span> <span class="st">&quot;sell&quot;</span><span class="fu">,</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;seq&quot;</span><span class="fu">:</span> <span class="dv">533776</span><span class="fu">,</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;price&quot;</span><span class="fu">:</span> <span class="fl">1596.8</span><span class="fu">,</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;qty&quot;</span><span class="fu">:</span> <span class="fl">200.0</span><span class="fu">,</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;timestamp&quot;</span><span class="fu">:</span> <span class="dv">1744551637145</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;feed&quot;</span><span class="fu">:</span> <span class="st">&quot;book&quot;</span><span class="fu">,</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;product_id&quot;</span><span class="fu">:</span> <span class="st">&quot;PI_ETHUSD&quot;</span><span class="fu">,</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;side&quot;</span><span class="fu">:</span> <span class="st">&quot;sell&quot;</span><span class="fu">,</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;seq&quot;</span><span class="fu">:</span> <span class="dv">533777</span><span class="fu">,</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;price&quot;</span><span class="fu">:</span> <span class="fl">1595.7</span><span class="fu">,</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;qty&quot;</span><span class="fu">:</span> <span class="fl">0.0</span><span class="fu">,</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;timestamp&quot;</span><span class="fu">:</span> <span class="dv">1744551641794</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+</div><div class="column" style="width:5%;">
+<p>➡️</p>
+</div><div class="column" style="width:60%;">
+<p>internal representation</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> BaseMessage(BaseModel):</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    message_type: MessageType</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> BookBase(BaseMessage):</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    timestamp: <span class="bu">int</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    seq: <span class="bu">int</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    product_id: <span class="bu">str</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> OrderbookSide(StrEnum):</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    BUY <span class="op">=</span> <span class="st">&quot;buy&quot;</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    SELL <span class="op">=</span> <span class="st">&quot;sell&quot;</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> BookDelta(BookBase):</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>    message_type: MessageType <span class="op">=</span> MessageType.BOOK</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>    side: OrderbookSide</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>    price: Decimal</span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>    qty: Decimal</span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a></span></code></pre></div>
+</div>
+</div>
 </section></section>
+<section>
 <section id="serialization-and-component-communication"
 class="title-slide slide level1">
 <h1>serialization and component communication</h1>
 
 </section>
+<section class="slide level2">
 
+<p><img
+data-src="high_level_architecture_serialization_communication.png"
+style="width:80.0%" /></p>
+</section>
+<section class="slide level2">
+
+<ul>
+<li>to allow for redundancy: horizontal scaling</li>
+<li>horizontal scaling requires communication via network (otherwise
+unix sockets might have been an option)</li>
+<li>to send something via network it has to be serialized</li>
+</ul>
+</section>
+<section id="serialization" class="slide level2">
+<h2>serialization</h2>
+<aside class="notes">
+<ul>
+<li>of course also a lot more possibilities exist</li>
+</ul>
+</aside>
+<blockquote>
+<p>the basic mechanisms are to flatten object(s) into a one-dimensional
+stream of bits, and to turn that stream of bits back into the original
+object(s). <a href="#/fn9" class="footnote-ref" id="fnref9"
+role="doc-noteref"><sup>9</sup></a></p>
+</blockquote>
+<p>possible candidates</p>
+<ul>
+<li>json</li>
+<li>protocol buffers (protobuf)</li>
+<li>flatbuffers</li>
+<li>msgpack</li>
+<li>pickle</li>
+<li>proprietary</li>
+</ul>
+</section>
+<section id="communication" class="slide level2">
+<h2>communication</h2>
+<aside class="notes">
+<ul>
+<li>of course also a lot more possibilities exist</li>
+</ul>
+</aside>
+<blockquote>
+<p>how to send serialized data over network to other component</p>
+</blockquote>
+<p>possible candidates</p>
+<ul>
+<li>proprietary tcp</li>
+<li>proprietary udp (also multicast)</li>
+<li>REST (HTTP)</li>
+<li>gRPC (requires protobuf as serialization)</li>
+<li>event streaming or message broker (kafka, rabbitmq, …)</li>
+<li>database (postgres, mysql, …)</li>
+</ul>
+</section>
+<section id="msgpack-via-kafka" class="slide level2">
+<h2>msgpack via kafka</h2>
+</section>
+<section id="why-kafka" class="slide level2">
+<h2>why kafka</h2>
+<aside class="notes">
+<ul>
+<li>more in-depth reasons in Github repo of presentation</li>
+</ul>
+</aside>
+<ul>
+<li>fast</li>
+<li>established
+<ul>
+<li>support in all (big) programming languages exist ➡️ consumer and
+producer are language independent</li>
+<li>can be used as managed service</li>
+<li>many people with experience ➡️ easier to hire</li>
+</ul></li>
+<li>resilient</li>
+<li>messages can be replayed</li>
+<li>scalable: n producers to m consumers
+<ul>
+<li>allows storing messages with separate consumer</li>
+<li>allows multiple producers on same channel (topic) for failovers</li>
+</ul></li>
+<li>does not require specific serialization</li>
+<li>disadvantages:
+<ul>
+<li>no built-in mechanism to check whether consumers are gone</li>
+<li>has to be operated as a separate service</li>
+</ul></li>
+</ul>
+</section>
+<section id="why-msgpack" class="slide level2">
+<h2>why msgpack</h2>
+<aside class="notes">
+<ul>
+<li>of course not established as JSON</li>
+<li>biggest reason against JSON: size</li>
+<li>more in-depth reasons in Github repo of presentation</li>
+</ul>
+</aside>
+<ul>
+<li>allows conversion of arbitrary objects to bytes and back</li>
+<li>schemalass (e.g. in contrast to protobuf)</li>
+<li>fast</li>
+<li>established
+<ul>
+<li>support in all (big) programming languages exist ➡️ consumer and
+producer are language independent</li>
+<li>backed and used by big products like redis, fluentd, pinterest</li>
+</ul></li>
+</ul>
+</section>
+<section id="resulting-architecture" class="slide level2">
+<h2>resulting architecture</h2>
+<figure>
+<img data-src="high_level_architecture_kafka.png" style="width:80.0%"
+alt="" />
+<figcaption aria-hidden="true"><a href="#/fn10" class="footnote-ref"
+id="fnref10" role="doc-noteref"><sup>10</sup></a></figcaption>
+</figure>
+</section></section>
 <section id="order-management-and-execution"
 class="title-slide slide level1">
 <h1>order management and execution</h1>
@@ -442,6 +745,17 @@ class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 <li id="fn7"><p><em><a
 href="https://refactoring.guru/design-patterns/adapter">Adapter design
 pattern, accessed 2025-04-12, 19:40</a></em><a href="#/fnref7"
+class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn8"><p><em><a href="https://github.com/ijl/orjson">orjson,
+accessed 2025-04-13 15:40</a></em><a href="#/fnref8"
+class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn9"><p><em><a
+href="https://isocpp.org/wiki/faq/serialization">Serialization, accessed
+2025-04-13, 16:40</a></em><a href="#/fnref9" class="footnote-back"
+role="doc-backlink">↩︎</a></p></li>
+<li id="fn10"><p><em><a
+href="https://de.m.wikipedia.org/wiki/Datei:Apache_Kafka_logo.svg">kafka
+logo, accessed 2025-04-13 17:51</a></em><a href="#/fnref10"
 class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 </ol>
 </section>

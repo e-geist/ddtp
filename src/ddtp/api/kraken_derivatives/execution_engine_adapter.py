@@ -4,12 +4,26 @@ import os
 from typing import Any
 
 from ddtp.api.kraken_derivatives.config import KrakenApiEnvVars
-from ddtp.api.kraken_derivatives.data import OpenOrdersSnapshot, OpenOrder, OpenOrderDelta, Fills as KrakenFills, \
-    WS_MESSAGES_EVENT_FIELD, WS_MESSAGES_FEED_FIELD, FeedType
+from ddtp.api.kraken_derivatives.data import (
+    OpenOrdersSnapshot,
+    OpenOrder,
+    OpenOrderDelta,
+    Fills as KrakenFills,
+    WS_MESSAGES_EVENT_FIELD,
+    WS_MESSAGES_FEED_FIELD,
+    FeedType,
+)
 from ddtp.api.kraken_derivatives.rest import KrakenDerivREST
 from ddtp.api.kraken_derivatives.websocket import KrakenDerivWebSocket
 from ddtp.marketdata.data import OrderbookSide
-from ddtp.order_execution.data import NewOrder, CancelOrder, ModifyOrder, OrderUpdate, OrderCancelUpdate, Fill
+from ddtp.order_execution.data import (
+    NewOrder,
+    CancelOrder,
+    ModifyOrder,
+    OrderUpdate,
+    OrderCancelUpdate,
+    Fill,
+)
 
 api_key = os.getenv(KrakenApiEnvVars.API_KEY)
 api_secret = os.getenv(KrakenApiEnvVars.API_SECRET)
@@ -17,6 +31,7 @@ api_url = os.getenv(KrakenApiEnvVars.REST_BASE_URL)
 rest_api = KrakenDerivREST(api_url, api_key, api_secret)
 
 logger = logging.getLogger("kraken_deriv_execution_engine_adapter")
+
 
 def process_new_action(new_order: NewOrder):
     rest_api.send_order(

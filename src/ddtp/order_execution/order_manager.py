@@ -8,7 +8,10 @@ from ddtp.order_execution.data import (
     CancelOrder,
     ModifyOrder,
     OrderCancelUpdate,
-    OrderUpdate, UNKNOWN_SENDER_ID, Fill, OrderStateChangeReason,
+    OrderUpdate,
+    UNKNOWN_SENDER_ID,
+    Fill,
+    OrderStateChangeReason,
 )
 
 logger = logging.getLogger("order_manager")
@@ -22,21 +25,33 @@ class OrderManager:
         self.order_id_to_client_order_id = dict[str, str]()
         self.client_order_id_to_sender_id = dict[str, str]()
 
-    def set_sender_id_if_needed(self, update: NewOrder | CancelOrder | ModifyOrder | OrderCancelUpdate | OrderUpdate):
+    def set_sender_id_if_needed(
+        self,
+        update: NewOrder | CancelOrder | ModifyOrder | OrderCancelUpdate | OrderUpdate,
+    ):
         if update.sender_id != UNKNOWN_SENDER_ID:
             return
 
         order_id_to_use = self.order_id_to_client_order_id.get(update.order_id)
         match update:
-            case NewOrder() | ModifyOrder() | OrderUpdate() | CancelOrder() if update.client_order_id:
+            case NewOrder() | ModifyOrder() | OrderUpdate() | CancelOrder() if (
+                update.client_order_id
+            ):
                 order_id_to_use = update.client_order_id
 
-        sender_id = self.client_order_id_to_sender_id.get(order_id_to_use, UNKNOWN_SENDER_ID)
+        sender_id = self.client_order_id_to_sender_id.get(
+            order_id_to_use, UNKNOWN_SENDER_ID
+        )
         update.sender_id = sender_id
 
     def process_update(
         self,
-        update: NewOrder | CancelOrder | ModifyOrder | OrderCancelUpdate | OrderUpdate | Fill,
+        update: NewOrder
+        | CancelOrder
+        | ModifyOrder
+        | OrderCancelUpdate
+        | OrderUpdate
+        | Fill,
     ):
         self.set_sender_id_if_needed(update)
         match update:
@@ -60,8 +75,11 @@ class OrderManager:
                     state=OrderState.CANCELLED,
                 )
             case OrderUpdate():
-                if update.state_change_reason in [OrderStateChangeReason.PARTIAL_FILL, OrderStateChangeReason.FILL]:
-                    return # handled via fill message
+                if update.state_change_reason in [
+                    OrderStateChangeReason.PARTIAL_FILL,
+                    OrderStateChangeReason.FILL,
+                ]:
+                    return  # handled via fill message
                 self.update_active_order(
                     order_id=update.order_id,
                     client_order_id=update.client_order_id,
@@ -74,7 +92,11 @@ class OrderManager:
                 self.update_active_order(
                     order_id=update.order_id,
                     client_order_id=update.client_order_id,
-                    state=(OrderState.FILLED if update.remaining_size == Decimal("0" ) else OrderState.ACTIVE),
+                    state=(
+                        OrderState.FILLED
+                        if update.remaining_size == Decimal("0")
+                        else OrderState.ACTIVE
+                    ),
                     fill_to_add=update.size,
                 )
 
@@ -83,7 +105,7 @@ class OrderManager:
         updates: NewOrder
         | CancelOrder
         | ModifyOrder
-        | list [Fill]
+        | list[Fill]
         | list[OrderUpdate]
         | list[OrderCancelUpdate],
     ):
@@ -138,14 +160,16 @@ class OrderManager:
     ):
         if client_order_id:
             order_id_to_use = client_order_id
-            if  order_id and (client_order_id not in self.order_id_to_client_order_id):
+            if order_id and (client_order_id not in self.order_id_to_client_order_id):
                 self.order_id_to_client_order_id[order_id] = client_order_id
         else:
             order_id_to_use = self.order_id_to_client_order_id.get(order_id)
 
         if not order_id_to_use:
             # Order is unknown, we don't handle it.
-            logger.warning(f"order with order_id:{order_id}/client_order_id:{client_order_id} is unknown, will not be modified")
+            logger.warning(
+                f"order with order_id:{order_id}/client_order_id:{client_order_id} is unknown, will not be modified"
+            )
             return
 
         order = self.active_orders.get(order_id_to_use)
@@ -172,8 +196,6 @@ class OrderManager:
         if order.filled_size == order.size:
             order.state = OrderState.FILLED
 
-
         if order.state in [OrderState.FILLED, OrderState.CANCELLED]:
             self.done_orders[order_id_to_use] = order
             self.active_orders.pop(order_id_to_use)
-

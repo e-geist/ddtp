@@ -12,7 +12,9 @@ from ddtp.order_execution.data import (
     ModifyOrder,
     CancelOrder,
 )
-from ddtp.order_execution.execution_engine_adapter import AvailableExecutionEngineAdapter
+from ddtp.order_execution.execution_engine_adapter import (
+    AvailableExecutionEngineAdapter,
+)
 from ddtp.order_execution.order_manager import OrderManager
 from ddtp.serialization.config import KafkaTopics
 from ddtp.serialization.consumer import consume_kafka_messages
@@ -26,7 +28,10 @@ clients = set[str]()
 order_manager = OrderManager()
 
 
-def get_on_order_action(order_manager_queue: mp.Queue, process_action: Callable[[NewOrder | CancelOrder | ModifyOrder], None]):
+def get_on_order_action(
+    order_manager_queue: mp.Queue,
+    process_action: Callable[[NewOrder | CancelOrder | ModifyOrder], None],
+):
     def on_order_action(key: str, message: dict[str, Any], timestamp: int):
         if key not in clients:
             clients.add(key)
@@ -72,7 +77,9 @@ def main():
     send_message_queue = mp.Queue()
     order_manager_queue = mp.Queue()
 
-    start_feedback_data_receival, send_order_action = AvailableExecutionEngineAdapter.KRAKEN_DERIVATIVES.value
+    start_feedback_data_receival, send_order_action = (
+        AvailableExecutionEngineAdapter.KRAKEN_DERIVATIVES.value
+    )
 
     receive_feedback_process = mp.Process(
         target=start_feedback_data_receival,

@@ -94,8 +94,8 @@ title-slide-attributes:
 ![](orderbook_btc_usd.jpg)
 
 ## trades and positions
-- **trade**: an order that was *executed* -> somebody else matched your order and you actually bought/sold a good
-- **position**: accumulation of all trades for one specific good -> how much do I actually have of a good
+- **trade**: an order that was *executed* ➡️ somebody else matched your order and you actually bought/sold a good
+- **position**: accumulation of all trades for one specific good ➡️ how much do I actually have of a good
 
 ## summary
 - order: sell or buy offer
@@ -141,15 +141,15 @@ I need for having records about performed actions
 
 ---
 
-I need for being sufficiently fast
+I need for being sufficiently fast to
 
-- to structure my components independently to scale them
-- pick fast technolgies
+- structure my components independently to scale them
+- pick fast technologies
 - pick a location as close as possible to the exchanges (if possible)
 
 ---
 
-![](high_level_architecture.drawio.png){ width=80% }
+![](high_level_architecture.png){ width=80% }
 
 # disclaimer
 
@@ -205,8 +205,9 @@ most exchanges have a simulation environment, that can be used for testing - als
 
 ## ➡️ marketdata adapter
 
-- receives marketdata from exchanges 
-- normalizes marketdata to internal representation
+- per exchange
+  - receives marketdata from exchanges 
+  - normalizes marketdata to internal representation
 - forwards normalized marketdata to strategies
 
 
@@ -214,7 +215,7 @@ most exchanges have a simulation environment, that can be used for testing - als
 
 - subscribes to marketdata for different instruments
   - via websocket
-  - exchange sends JSON
+  - exchange sends JSON (use orjson[^8] for fast parsing)
 - L2 marketdata ➡️ orderbook levels
   - on connect a _snapshot_ is received: the whole orderbook 
   - consecutive messages are _deltas_: what changes to levels ocurred compared to previous message
@@ -222,7 +223,234 @@ most exchanges have a simulation environment, that can be used for testing - als
   - not only transformation, but also keeps track of orderbooks
   - sends each N minutes a snapshot to the strategies
 
+[^8]: _[orjson, accessed 2025-04-13 15:40](https://github.com/ijl/orjson)_
+
+---
+
+### Snapshot message
+::: notes
+
+if somebody knows how to center this arrow in pandoc, please write me a message
+
+:::
+
+:::::::::::::: {.columns align=center}
+::: {.column width="35%"}
+kraken futures
+```json
+{
+    "feed": "book_snapshot",
+    "product_id": "PI_ETHUSD",
+    "timestamp": 1744550040435,
+    "seq": 528862,
+    "tickSize": null,
+    "bids": [
+        {
+            "price": 1556.2,
+            "qty": 200.0
+        },
+    ],
+    ...
+    "asks": [
+        {
+            "price": 1556.825,
+            "qty": 184.0
+        },
+        ...
+    ]
+}
+```
+:::
+::: {.column width="5%"}
+➡️
+:::
+::: {.column width="60%"}
+internal representation
+```python
+class BaseMessage(BaseModel):
+    message_type: MessageType
+
+    
+class BookBase(BaseMessage):
+    timestamp: int
+    seq: int
+    product_id: str
+    
+    
+class OrderBookEntry(BaseModel):
+    price: Decimal
+    qty: Decimal
+
+    
+class BookSnapshot(BookBase):
+    message_type: MessageType = MessageType.BOOK_SNAPSHOT
+    tickSize: Optional[Decimal]
+    bids: list[OrderBookEntry]
+    asks: list[OrderBookEntry]
+
+
+```
+:::
+::::::::::::::
+
+---
+
+### Delta message
+
+:::::::::::::: {.columns align=center}
+::: {.column width="35%"}
+kraken futures
+```json
+{
+    "feed": "book",
+    "product_id": "PI_ETHUSD",
+    "side": "sell",
+    "seq": 533776,
+    "price": 1596.8,
+    "qty": 200.0,
+    "timestamp": 1744551637145
+}
+{
+    "feed": "book",
+    "product_id": "PI_ETHUSD",
+    "side": "sell",
+    "seq": 533777,
+    "price": 1595.7,
+    "qty": 0.0,
+    "timestamp": 1744551641794
+}
+```
+:::
+::: {.column width="5%"}
+➡️
+:::
+::: {.column width="60%"}
+internal representation
+```python
+class BaseMessage(BaseModel):
+    message_type: MessageType
+
+class BookBase(BaseMessage):
+    timestamp: int
+    seq: int
+    product_id: str
+    
+class OrderbookSide(StrEnum):
+    BUY = "buy"
+    SELL = "sell"
+    
+class BookDelta(BookBase):
+    message_type: MessageType = MessageType.BOOK
+    side: OrderbookSide
+    price: Decimal
+    qty: Decimal
+
+
+```
+:::
+::::::::::::::
+
 # serialization and component communication
+
+--- 
+
+![](high_level_architecture_serialization_communication.png){ width=80% }
+
+---
+
+- to allow for redundancy: horizontal scaling
+- horizontal scaling requires communication via network (otherwise unix sockets might have been an option)
+- to send something via network it has to be serialized
+
+## serialization
+
+::: notes
+
+- of course also a lot more possibilities exist
+
+:::
+
+> the basic mechanisms are to flatten object(s) into a one-dimensional stream of bits, and to turn that stream of bits back into the original object(s). [^9]
+
+[^9]: _[Serialization, accessed 2025-04-13, 16:40](https://isocpp.org/wiki/faq/serialization)_
+
+possible candidates
+
+- json
+- protocol buffers (protobuf)
+- flatbuffers
+- msgpack
+- pickle
+- proprietary
+
+---
+
+## communication
+
+::: notes
+
+- of course also a lot more possibilities exist
+
+:::
+> how to send serialized data over network to other component
+
+possible candidates
+
+- proprietary tcp
+- proprietary udp (also multicast)
+- REST (HTTP)
+- gRPC (requires protobuf as serialization)
+- event streaming or message broker (kafka, rabbitmq, ...)
+- database (postgres, mysql, ...)
+
+## msgpack via kafka
+
+## why kafka
+
+::: notes
+
+- more in-depth reasons in Github repo of presentation
+
+:::
+
+- fast
+- established
+  - support in all (big) programming languages exist ➡️ consumer and producer are language independent
+  - can be used as managed service
+  - many people with experience ➡️ easier to hire
+- resilient
+- messages can be replayed
+- scalable: n producers to m consumers
+  - allows storing messages with separate consumer
+  - allows multiple producers on same channel (topic) for failovers
+- does not require specific serialization
+- disadvantages: 
+  - no built-in mechanism to check whether consumers are gone
+  - has to be operated as a separate service
+
+## why msgpack
+
+::: notes
+
+- of course not established as JSON
+- biggest reason against JSON: size
+- more in-depth reasons in Github repo of presentation
+
+:::
+
+- allows conversion of arbitrary objects to bytes and back
+- schemalass (e.g. in contrast to protobuf)
+- fast
+- established
+  - support in all (big) programming languages exist ➡️ consumer and producer are language independent
+  - backed and used by big products like redis, fluentd, pinterest
+
+
+## resulting architecture
+
+![[^10]](high_level_architecture_kafka.png){ width=80% }
+
+[^10]: _[kafka logo, accessed 2025-04-13 17:51](https://de.m.wikipedia.org/wiki/Datei:Apache_Kafka_logo.svg)_
 
 # order management and execution
 

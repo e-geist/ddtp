@@ -25,7 +25,7 @@ and adapted.
 # IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 import logging
-import json
+import orjson
 import hashlib
 import base64
 import hmac
@@ -83,7 +83,7 @@ class KrakenDerivWebSocket:
 
         self.logger.info("public subscribe to %s", feed)
 
-        request_json = json.dumps(request_message)
+        request_json = orjson.dumps(request_message)
         self.ws.send(request_json)
 
     def unsubscribe_public(self, feed, product_ids=None):
@@ -99,7 +99,7 @@ class KrakenDerivWebSocket:
             }
 
         self.logger.info("public unsubscribe to %s", feed)
-        request_json = json.dumps(request_message)
+        request_json = orjson.dumps(request_message)
         self.ws.send(request_json)
 
     # Private feeds
@@ -119,7 +119,7 @@ class KrakenDerivWebSocket:
 
         self.logger.info("private subscribe to %s", feed)
 
-        request_json = json.dumps(request_message)
+        request_json = orjson.dumps(request_message)
         self.ws.send(request_json)
 
     def unsubscribe_private(self, feed):
@@ -138,7 +138,7 @@ class KrakenDerivWebSocket:
 
         self.logger.info("private unsubscribe to %s", feed)
 
-        request_json = json.dumps(request_message)
+        request_json = orjson.dumps(request_message)
         self.ws.send(request_json)
 
     def __connect(self):
@@ -172,7 +172,7 @@ class KrakenDerivWebSocket:
         """Listen the web socket connection. Block until a message
         arrives."""
 
-        message_json = json.loads(message)
+        message_json = orjson.loads(message)
         self.logger.debug(message_json)
 
         if message_json.get("event", "") == "challenge":
@@ -201,7 +201,7 @@ class KrakenDerivWebSocket:
 
         request_message = {"event": "challenge", "api_key": self.api_key}
 
-        request_json = json.dumps(request_message)
+        request_json = orjson.dumps(request_message)
         self.ws.send(request_json)
 
     def __sign_challenge(self, challenge):

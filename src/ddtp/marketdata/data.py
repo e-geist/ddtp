@@ -24,24 +24,19 @@ class TradeType(StrEnum):
     BLOCK = "block"
 
 
-class OrderBookEntry(BaseModel):
-    price: Decimal
-    qty: Decimal
-
-
 class BaseMessage(BaseModel):
     message_type: MessageType
-
-
-class MarketdataSubscribed(BaseMessage):
-    event: str | None = None
-    product_ids: list[str]
 
 
 class BookBase(BaseMessage):
     timestamp: int
     seq: int
     product_id: str
+
+
+class OrderBookEntry(BaseModel):
+    price: Decimal
+    qty: Decimal
 
 
 class BookSnapshot(BookBase):
