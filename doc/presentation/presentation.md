@@ -25,13 +25,13 @@ title-slide-attributes:
 # agenda
 
 - motivation
-- fundamental trading concepts and market mechanics
+- fundamental trading concepts
 - functional and non-functional requirements
-- market data ingestion and processing
-- serialization and component communication
-- order management and execution
 - implementation of trading strategies
-- post-trade analysis
+- component communication
+- marketdata ingestion and processing
+- order management and execution
+- data storage and post-trade analysis
 - outlook
 
 # motivation
@@ -98,18 +98,19 @@ title-slide-attributes:
 - **position**: accumulation of all trades for one specific good ➡️ how much do I actually have of a good
 
 ## summary
+
 - order: sell or buy offer
 - orderbook: list of sell and buy offers for one good
 - trade: I bought/sold a good for a price
 - position: How much I have of a good
-
+- instrument: traded good
 
 # functional and non-functional requirements
 
 ## functional requirements
 I want to
 
-- be able to trade goods with different algorithms on an exchange 
+- be able to trade instruments with different algorithms on an exchange 
 - get insights about how I traded 
 - improve my trading systematically
 
@@ -118,7 +119,7 @@ I want to
 
 - trade 
   - on different exchanges (Extensibility + Scalability)
-  - multiple goods (Scalability)
+  - multiple instruments (Scalability)
   - using different (Extensibility + Scalability)
 - have recordings about performed actions (Transparency + Compliance)
 - be sufficiently fast to trade properly (Performance + Throughput)
@@ -168,6 +169,213 @@ most exchanges have a simulation environment, that can be used for testing - als
 [^5]: _[Kraken futures, accessed 2025-04-12, 18:15](https://www.kraken.com/features/futures)_
 [^6]: _[Kraken futures simulation environment, accessed 2025-04-12, 18:20](https://demo-futures.kraken.com/futures)_
 
+# implementation of trading strategies
+
+---
+
+![](img/high_level_architecture_strategies.png){ width=80% }
+
+---
+
+## trading strategies or algorithms
+
+- based on a signal a decision is made to act on a market
+- most important signals, that need to be provided
+  - marktdata
+  - feedback for own orders
+  - own position
+  - for derivatives: data of underlying assets (live or forecasts)
+- needs to be able to execute wanted actions on a market ➡️ *order actions*
+
+## implementation
+
+- most of the time it makes sense to have one trading strategy instance per traded instrument as
+  - orderbooks are separated per instrument
+  - orders are sent per instrument
+- to make decisions, trading strategy should keep track of 
+  - marketdata/orderbook of traded instrument ➡️ requires marketdata from exchange and book-building
+  - own active orders ➡️ requires feedback for sent orders
+  - own position/exposure ➡️ requires feedback for sent orders
+- to be able to act, trading strategies require need an interface to send order actions
+
+---
+
+### subscription to marketdata with callbacks
+
+```python
+def subscribe_orderbook_data(
+    *,
+    product_ids: set[str],
+    on_trade: Callable[[TradeSnapshot | TradeDelta], None],
+    on_orderbook_event: Callable[[BookSnapshot | BookDelta], None],
+):
+    ...
+```
+
+---
+
+### interface to send orders
+:::::::::::::: {.columns align=center}
+::: {.column width="50%"}
+
+```python
+def send_new_order_to_execution_engine(
+    *,
+    sender_identifier: str,
+    product_id: str,
+    side: OrderbookSide,
+    order_type: OrderType,
+    size: Decimal,
+    limit_price: Decimal,
+    stop_price: Decimal | None = None,
+) -> str:
+    ...
+
+
+def send_cancel_order_to_execution_engine(
+    *,
+    sender_identifier: str,
+    product_id: str,
+    client_order_id: str,
+    order_id: str | None = None,
+):
+    ...
+```
+:::
+::: {.column width="50%"}
+```python
+def send_modify_order_to_execution_engine(
+    *,
+    sender_identifier: str,
+    product_id: str,
+    client_order_id: str,
+    order_id: str | None = None,
+    process_before: dt.datetime | None = None,
+    size: Decimal | None = None,
+    limit_price: Decimal | None = None,
+    stop_price: Decimal | None = None,
+):
+    ...
+
+
+
+
+
+
+
+
+
+
+```
+:::
+::::::::::::::
+
+# component communication
+
+--- 
+
+![](img/high_level_architecture_serialization_communication.png){ width=80% }
+
+---
+
+- to allow for redundancy: horizontal scaling
+- horizontal scaling requires communication via network (otherwise unix sockets might have been an option)
+- to send something via network it has to be serialized
+
+## serialization
+
+::: notes
+
+- of course also a lot more possibilities exist
+
+:::
+
+> the basic mechanisms are to flatten object(s) into a one-dimensional stream of bits, and to turn that stream of bits back into the original object(s). [^9]
+
+[^9]: _[Serialization, accessed 2025-04-13, 16:40](https://isocpp.org/wiki/faq/serialization)_
+
+possible candidates
+
+- json
+- protocol buffers (protobuf)
+- flatbuffers
+- msgpack
+- pickle
+- proprietary
+
+---
+
+## communication
+
+::: notes
+
+- of course also a lot more possibilities exist
+
+:::
+> how to send serialized data over network to other component
+
+possible candidates
+
+- proprietary tcp
+- proprietary udp (also multicast)
+- REST (HTTP)
+- gRPC (requires protobuf as serialization)
+- event streaming or message broker (kafka, rabbitmq, ...)
+- database (postgres, mysql, ...)
+
+## messagepack via kafka
+
+## why kafka
+
+::: notes
+
+- more in-depth reasons in Github repo of presentation
+
+:::
+
+- fast
+- established
+  - support in all (big) programming languages exist ➡️ consumer and producer are language independent (used kafka-python[^10])
+  - can be used as managed service in cloud
+  - many people with experience ➡️ easier to hire
+- resilient
+- messages can be replayed
+- scalable: n producers to m consumers
+  - allows storing messages with separate consumer
+  - allows multiple producers on same channel (topic) for failovers
+- does not require specific serialization
+- disadvantages: 
+  - no built-in mechanism to check whether consumers are gone
+  - has to be operated as a separate service
+
+[^10]: _[kafka-python, accessed 2025-04-13 16:50](https://github.com/dpkp/kafka-python)_
+
+## why messagepack
+
+::: notes
+
+- of course not established as JSON
+- biggest reason against JSON: size
+- more in-depth reasons in Github repo of presentation
+
+:::
+
+- allows conversion of arbitrary objects to bytes and back
+- schemalass (e.g. in contrast to protobuf)
+- fast
+- established
+  - support in all (big) programming languages exist (used ormsgpack[^11] for python)
+  - backed and used by big products like redis, fluentd, pinterest
+
+[^11]: _[ormsgpack, accessed 2025-04-13 16:50](https://github.com/aviramha/ormsgpack)_
+
+## resulting architecture
+
+![[^12]](img/high_level_architecture_kafka.png){ width=80% }
+
+[^12]: _[kafka logo, accessed 2025-04-13 17:51](https://de.m.wikipedia.org/wiki/Datei:Apache_Kafka_logo.svg)_
+
+
 # marketdata ingestion and processing
 
 ---
@@ -179,7 +387,7 @@ most exchanges have a simulation environment, that can be used for testing - als
 ## general
 
 - also called public data
-- one orderbook per traded good
+- one orderbook per traded instrument
 - essential for implementing trading strategies as current prices and quantities are provided
 - mostly available as unidirectional data streams (e.g. via websockets, TCP or UDP)
 - different types of data
@@ -350,117 +558,12 @@ class BookDelta(BookBase):
 :::
 ::::::::::::::
 
-# serialization and component communication
-
---- 
-
-![](img/high_level_architecture_serialization_communication.png){ width=80% }
-
----
-
-- to allow for redundancy: horizontal scaling
-- horizontal scaling requires communication via network (otherwise unix sockets might have been an option)
-- to send something via network it has to be serialized
-
-## serialization
-
-::: notes
-
-- of course also a lot more possibilities exist
-
-:::
-
-> the basic mechanisms are to flatten object(s) into a one-dimensional stream of bits, and to turn that stream of bits back into the original object(s). [^9]
-
-[^9]: _[Serialization, accessed 2025-04-13, 16:40](https://isocpp.org/wiki/faq/serialization)_
-
-possible candidates
-
-- json
-- protocol buffers (protobuf)
-- flatbuffers
-- msgpack
-- pickle
-- proprietary
-
----
-
-## communication
-
-::: notes
-
-- of course also a lot more possibilities exist
-
-:::
-> how to send serialized data over network to other component
-
-possible candidates
-
-- proprietary tcp
-- proprietary udp (also multicast)
-- REST (HTTP)
-- gRPC (requires protobuf as serialization)
-- event streaming or message broker (kafka, rabbitmq, ...)
-- database (postgres, mysql, ...)
-
-## messagepack via kafka
-
-## why kafka
-
-::: notes
-
-- more in-depth reasons in Github repo of presentation
-
-:::
-
-- fast
-- established
-  - support in all (big) programming languages exist ➡️ consumer and producer are language independent (used kafka-python[^10])
-  - can be used as managed service in cloud
-  - many people with experience ➡️ easier to hire
-- resilient
-- messages can be replayed
-- scalable: n producers to m consumers
-  - allows storing messages with separate consumer
-  - allows multiple producers on same channel (topic) for failovers
-- does not require specific serialization
-- disadvantages: 
-  - no built-in mechanism to check whether consumers are gone
-  - has to be operated as a separate service
-
-[^10]: _[kafka-python, accessed 2025-04-13 16:50](https://github.com/dpkp/kafka-python)_
-
-## why messagepack
-
-::: notes
-
-- of course not established as JSON
-- biggest reason against JSON: size
-- more in-depth reasons in Github repo of presentation
-
-:::
-
-- allows conversion of arbitrary objects to bytes and back
-- schemalass (e.g. in contrast to protobuf)
-- fast
-- established
-  - support in all (big) programming languages exist (used ormsgpack[^11] for python)
-  - backed and used by big products like redis, fluentd, pinterest
-
-[^11]: _[ormsgpack, accessed 2025-04-13 16:50](https://github.com/aviramha/ormsgpack)_
-
-## resulting architecture
-
-![[^12]](img/high_level_architecture_kafka.png){ width=80% }
-
-[^12]: _[kafka logo, accessed 2025-04-13 17:51](https://de.m.wikipedia.org/wiki/Datei:Apache_Kafka_logo.svg)_
-
 
 # order management and execution
 
 ---
 
-![](img/high_level_architecture_kafka_order_execution.png){ width=80% }
+![](img/high_level_architecture_order_execution.png){ width=80% }
 
 ---
 
@@ -517,7 +620,130 @@ possible candidates
 
 ---
 
-## TODO: add code and JSON excerpts
+### new order request
+::: notes
+
+- action_type assignment on next line for better readability
+
+:::
+:::::::::::::: {.columns}
+::: {.column width="55%"}
+```python
+class OrderBase(BaseModel):
+    action_type: OrderActionType
+    sender_id: str = UNKNOWN_SENDER_ID
+    product_id: str
+    client_order_id: str | None = None
+
+
+class NewOrder(OrderBase):
+    action_type: OrderActionType = 
+        OrderActionType.NEW_ORDER
+    side: OrderbookSide
+    order_type: OrderType
+    size: Decimal
+    limit_price: Decimal
+    stop_price: Decimal | None = None
+
+
+```
+:::
+::: {.column width="5%"}
+➡️
+:::
+::: {.column width="40%"}
+```
+orderType=lmt&symbol=PI_XBTUSD&
+side=buy&size=1&limitPrice=84389.0
+&cliOrdId=...
+```
+OR
+```json
+{
+  "orderType": "lmt",
+  "symbol": "PI_XBTUSD",
+  "side": "buy",
+  "size": 1,
+  "limitPrice": 84389.0, 
+  "cliOrdId": "..."
+}
+```
+:::
+::::::::::::::
+
+---
+
+### fill response message 
+
+::: notes
+
+- response_type assignment on next line for better readability
+
+:::
+:::::::::::::: {.columns}
+::: {.column width="40%"}
+kraken futures
+```json
+{
+    "feed": "fills",
+    "username": "...",
+    "fills": [
+        {
+            "instrument": "PI_XBTUSD",
+            "time": 1744729661598,
+            "price": 84889.0,
+            "seq": 100,
+            "buy": true,
+            "qty": 1.0,
+            "remaining_order_qty": 0.0,
+            "order_id": "...",
+            "cli_ord_id": "...",
+            "fill_id": "...",
+            "fill_type": "taker",
+            "fee_paid": 5.9e-09,
+            "fee_currency": "BTC",
+            "taker_order_type": "lmt",
+            "order_type": "lmt"
+        }
+    ]
+}
+```
+
+:::
+:::{.column width="5%"}
+➡️
+:::
+:::{.column width="55%"}
+internal representation
+```python
+class OrderResponse(BaseModel):
+    response_type: OrderActionType
+    sender_id: str = UNKNOWN_SENDER_ID
+    product_id: str
+    client_order_id: str | None = None
+    order_id: str
+    side: OrderbookSide
+    size: Decimal
+    price: Decimal
+
+class Fill(OrderResponse):
+    response_type: OrderActionType = 
+        OrderActionResponseType.FILL
+    time: int
+    fill_id: str
+    remaining_size: Decimal
+
+
+
+    
+    
+    
+    
+
+
+```
+:::
+::::::::::::::
 
 ---
 
@@ -536,28 +762,6 @@ possible candidates
   - act proactively (e.g. don't send cancel for filled order)
   - keep track of rate limits and allow cancels in emergencies
 
-# implementation of trading strategies
-
----
-
-## TODO: add image of strategies
-
----
-
-## trading strategies or algorithms
-
-- based on a signal a decision is made to act on a certain market
-- most important signals
-  - marktdata
-  - feedback for own orders
-  - own position
-  - for derivatives: forecasts of underlying assets
-- needs to be able to execute wanted actions on a market ➡️ order actions
-
-## implementation
-
-TODO
-
-# post-trade analysis
+# data storage and post-trade analysis
 
 # outlook

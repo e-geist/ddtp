@@ -281,6 +281,7 @@ specific good ➡️ how much do I actually have of a good</li>
 <li>orderbook: list of sell and buy offers for one good</li>
 <li>trade: I bought/sold a good for a price</li>
 <li>position: How much I have of a good</li>
+<li>instrument: traded good</li>
 </ul>
 </section></section>
 <section>
@@ -293,7 +294,8 @@ class="title-slide slide level1">
 <h2>functional requirements</h2>
 <p>I want to</p>
 <ul>
-<li>be able to trade goods with different algorithms on an exchange</li>
+<li>be able to trade instruments with different algorithms on an
+exchange</li>
 <li>get insights about how I traded</li>
 <li>improve my trading systematically</li>
 </ul>
@@ -305,7 +307,7 @@ class="title-slide slide level1">
 <li>trade
 <ul>
 <li>on different exchanges (Extensibility + Scalability)</li>
-<li>multiple goods (Scalability)</li>
+<li>multiple instruments (Scalability)</li>
 <li>using different (Extensibility + Scalability)</li>
 </ul></li>
 <li>have recordings about performed actions (Transparency +
@@ -370,197 +372,114 @@ testing - also Kraken futures<a href="#/fn6" class="footnote-ref"
 id="fnref6" role="doc-noteref"><sup>6</sup></a>.</p>
 </section></section>
 <section>
-<section id="marketdata-ingestion-and-processing"
+<section id="implementation-of-trading-strategies"
 class="title-slide slide level1">
-<h1>marketdata ingestion and processing</h1>
+<h1>implementation of trading strategies</h1>
 
 </section>
 <section class="slide level2">
 
-<p><img data-src="img/high_level_architecture_marketdata.png"
+<p><img data-src="img/high_level_architecture_strategies.png"
 style="width:80.0%" /></p>
 </section>
-<section id="general" class="slide level2">
-<h2>general</h2>
+<section id="trading-strategies-or-algorithms" class="slide level2">
+<h2>trading strategies or algorithms</h2>
 <ul>
-<li>also called public data</li>
-<li>one orderbook per traded good</li>
-<li>essential for implementing trading strategies as current prices and
-quantities are provided</li>
-<li>mostly available as unidirectional data streams (e.g. via
-websockets, TCP or UDP)</li>
-<li>different types of data
+<li>based on a signal a decision is made to act on a market</li>
+<li>most important signals, that need to be provided
 <ul>
-<li><strong>level 1</strong> (or top of book) data: currently best buy
-(highest) and sell (lowest) offer</li>
-<li><strong>level 2</strong> data: excerpt from orderbook with top n
-levels</li>
-<li><strong>level 3</strong> (or tick-by-tick or order-by-order) data:
-each order and its state (placed, changed, removed)</li>
-<li>usually also information about trades</li>
+<li>marktdata</li>
+<li>feedback for own orders</li>
+<li>own position</li>
+<li>for derivatives: data of underlying assets (live or forecasts)</li>
 </ul></li>
-<li>level 3 data contains the most detail, but also has highest volume
-and is usually most expensive</li>
+<li>needs to be able to execute wanted actions on a market ➡️ <em>order
+actions</em></li>
+</ul>
+</section>
+<section id="implementation" class="slide level2">
+<h2>implementation</h2>
+<ul>
+<li>most of the time it makes sense to have one trading strategy
+instance per traded instrument as
+<ul>
+<li>orderbooks are separated per instrument</li>
+<li>orders are sent per instrument</li>
+</ul></li>
+<li>to make decisions, trading strategy should keep track of
+<ul>
+<li>marketdata/orderbook of traded instrument ➡️ requires marketdata
+from exchange and book-building</li>
+<li>own active orders ➡️ requires feedback for sent orders</li>
+<li>own position/exposure ➡️ requires feedback for sent orders</li>
+</ul></li>
+<li>to be able to act, trading strategies require need an interface to
+send order actions</li>
 </ul>
 </section>
 <section class="slide level2">
 
-<p><img data-src="img/orderbook_btc_usd.jpg" /></p>
-</section>
-<section id="marketdata-ingestion" class="slide level2">
-<h2>marketdata ingestion</h2>
-<ul>
-<li>trading strategies should be use-able on different exchanges</li>
-<li>different exchanges have different marketdata protocols</li>
-<li>decoupling of trading system from exchanges by normalizing
-marketdata to internal format via adapter pattern<a href="#/fn7"
-class="footnote-ref" id="fnref7"
-role="doc-noteref"><sup>7</sup></a></li>
-</ul>
-</section>
-<section id="marketdata-adapter" class="slide level2">
-<h2>➡️ marketdata adapter</h2>
-<ul>
-<li>per exchange
-<ul>
-<li>receives marketdata from exchanges</li>
-<li>normalizes marketdata to internal representation</li>
-</ul></li>
-<li>forwards normalized marketdata to strategies</li>
-</ul>
-</section>
-<section id="kraken-derivatives-marketdata-adapter"
-class="slide level2">
-<h2>Kraken derivatives marketdata adapter</h2>
-<ul>
-<li>subscribes to marketdata for different instruments
-<ul>
-<li>via websocket</li>
-<li>exchange sends JSON (use orjson<a href="#/fn8" class="footnote-ref"
-id="fnref8" role="doc-noteref"><sup>8</sup></a> for fast parsing)</li>
-</ul></li>
-<li>L2 marketdata ➡️ orderbook levels
-<ul>
-<li>on connect a <em>snapshot</em> is received: the whole orderbook</li>
-<li>consecutive messages are <em>deltas</em>: what changes to levels
-ocurred compared to previous message</li>
-</ul></li>
-<li>received marketdata is processed and sent to strategies
-<ul>
-<li>not only transformation, but also keeps track of orderbooks</li>
-<li>sends each N minutes a snapshot to the strategies</li>
-</ul></li>
-</ul>
-</section>
-<section class="slide level2">
-
-<h3 id="snapshot-message">Snapshot message</h3>
-<aside class="notes">
-<p>if somebody knows how to center this arrow in pandoc, please write me
-a message</p>
-</aside>
-<div class="columns" data-align="center">
-<div class="column" style="width:35%;">
-<p>kraken futures</p>
+<h3 id="subscription-to-marketdata-with-callbacks">subscription to
+marketdata with callbacks</h3>
 <div class="sourceCode" id="cb1"><pre
-class="sourceCode json"><code class="sourceCode json"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;feed&quot;</span><span class="fu">:</span> <span class="st">&quot;book_snapshot&quot;</span><span class="fu">,</span></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;product_id&quot;</span><span class="fu">:</span> <span class="st">&quot;PI_ETHUSD&quot;</span><span class="fu">,</span></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;timestamp&quot;</span><span class="fu">:</span> <span class="dv">1744550040435</span><span class="fu">,</span></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;seq&quot;</span><span class="fu">:</span> <span class="dv">528862</span><span class="fu">,</span></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;tickSize&quot;</span><span class="fu">:</span> <span class="kw">null</span><span class="fu">,</span></span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;bids&quot;</span><span class="fu">:</span> <span class="ot">[</span></span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>        <span class="fu">{</span></span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>            <span class="dt">&quot;price&quot;</span><span class="fu">:</span> <span class="fl">1556.2</span><span class="fu">,</span></span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>            <span class="dt">&quot;qty&quot;</span><span class="fu">:</span> <span class="fl">200.0</span></span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>        <span class="fu">}</span><span class="ot">,</span></span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    <span class="ot">]</span><span class="fu">,</span></span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    <span class="er">...</span></span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;asks&quot;</span><span class="fu">:</span> <span class="ot">[</span></span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>        <span class="fu">{</span></span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>            <span class="dt">&quot;price&quot;</span><span class="fu">:</span> <span class="fl">1556.825</span><span class="fu">,</span></span>
-<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>            <span class="dt">&quot;qty&quot;</span><span class="fu">:</span> <span class="fl">184.0</span></span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>        <span class="fu">}</span><span class="ot">,</span></span>
-<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>        <span class="er">...</span></span>
-<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>    <span class="ot">]</span></span>
-<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
-</div><div class="column" style="width:5%;">
-<p>➡️</p>
-</div><div class="column" style="width:60%;">
-<p>internal representation</p>
-<div class="sourceCode" id="cb2"><pre
-class="sourceCode python"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> BaseMessage(BaseModel):</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    message_type: MessageType</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> BookBase(BaseMessage):</span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    timestamp: <span class="bu">int</span></span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    seq: <span class="bu">int</span></span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    product_id: <span class="bu">str</span></span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> OrderBookEntry(BaseModel):</span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    price: Decimal</span>
-<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    qty: Decimal</span>
-<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> BookSnapshot(BookBase):</span>
-<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>    message_type: MessageType <span class="op">=</span> MessageType.BOOK_SNAPSHOT</span>
-<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>    tickSize: Optional[Decimal]</span>
-<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>    bids: <span class="bu">list</span>[OrderBookEntry]</span>
-<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>    asks: <span class="bu">list</span>[OrderBookEntry]</span>
-<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a></span></code></pre></div>
-</div>
-</div>
+class="sourceCode python"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> subscribe_orderbook_data(</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="op">*</span>,</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    product_ids: <span class="bu">set</span>[<span class="bu">str</span>],</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    on_trade: Callable[[TradeSnapshot <span class="op">|</span> TradeDelta], <span class="va">None</span>],</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    on_orderbook_event: Callable[[BookSnapshot <span class="op">|</span> BookDelta], <span class="va">None</span>],</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>):</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    ...</span></code></pre></div>
 </section>
 <section class="slide level2">
 
-<h3 id="delta-message">Delta message</h3>
+<h3 id="interface-to-send-orders">interface to send orders</h3>
 <div class="columns" data-align="center">
-<div class="column" style="width:35%;">
-<p>kraken futures</p>
+<div class="column" style="width:50%;">
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> send_new_order_to_execution_engine(</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="op">*</span>,</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    sender_identifier: <span class="bu">str</span>,</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    product_id: <span class="bu">str</span>,</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    side: OrderbookSide,</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    order_type: OrderType,</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    size: Decimal,</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    limit_price: Decimal,</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    stop_price: Decimal <span class="op">|</span> <span class="va">None</span> <span class="op">=</span> <span class="va">None</span>,</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>) <span class="op">-&gt;</span> <span class="bu">str</span>:</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    ...</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> send_cancel_order_to_execution_engine(</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>    <span class="op">*</span>,</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>    sender_identifier: <span class="bu">str</span>,</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>    product_id: <span class="bu">str</span>,</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>    client_order_id: <span class="bu">str</span>,</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>    order_id: <span class="bu">str</span> <span class="op">|</span> <span class="va">None</span> <span class="op">=</span> <span class="va">None</span>,</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>):</span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>    ...</span></code></pre></div>
+</div><div class="column" style="width:50%;">
 <div class="sourceCode" id="cb3"><pre
-class="sourceCode json"><code class="sourceCode json"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;feed&quot;</span><span class="fu">:</span> <span class="st">&quot;book&quot;</span><span class="fu">,</span></span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;product_id&quot;</span><span class="fu">:</span> <span class="st">&quot;PI_ETHUSD&quot;</span><span class="fu">,</span></span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;side&quot;</span><span class="fu">:</span> <span class="st">&quot;sell&quot;</span><span class="fu">,</span></span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;seq&quot;</span><span class="fu">:</span> <span class="dv">533776</span><span class="fu">,</span></span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;price&quot;</span><span class="fu">:</span> <span class="fl">1596.8</span><span class="fu">,</span></span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;qty&quot;</span><span class="fu">:</span> <span class="fl">200.0</span><span class="fu">,</span></span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;timestamp&quot;</span><span class="fu">:</span> <span class="dv">1744551637145</span></span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;feed&quot;</span><span class="fu">:</span> <span class="st">&quot;book&quot;</span><span class="fu">,</span></span>
-<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;product_id&quot;</span><span class="fu">:</span> <span class="st">&quot;PI_ETHUSD&quot;</span><span class="fu">,</span></span>
-<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;side&quot;</span><span class="fu">:</span> <span class="st">&quot;sell&quot;</span><span class="fu">,</span></span>
-<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;seq&quot;</span><span class="fu">:</span> <span class="dv">533777</span><span class="fu">,</span></span>
-<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;price&quot;</span><span class="fu">:</span> <span class="fl">1595.7</span><span class="fu">,</span></span>
-<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;qty&quot;</span><span class="fu">:</span> <span class="fl">0.0</span><span class="fu">,</span></span>
-<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;timestamp&quot;</span><span class="fu">:</span> <span class="dv">1744551641794</span></span>
-<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
-</div><div class="column" style="width:5%;">
-<p>➡️</p>
-</div><div class="column" style="width:60%;">
-<p>internal representation</p>
-<div class="sourceCode" id="cb4"><pre
-class="sourceCode python"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> BaseMessage(BaseModel):</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    message_type: MessageType</span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> BookBase(BaseMessage):</span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    timestamp: <span class="bu">int</span></span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    seq: <span class="bu">int</span></span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    product_id: <span class="bu">str</span></span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> OrderbookSide(StrEnum):</span>
-<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    BUY <span class="op">=</span> <span class="st">&quot;buy&quot;</span></span>
-<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    SELL <span class="op">=</span> <span class="st">&quot;sell&quot;</span></span>
-<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> BookDelta(BookBase):</span>
-<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>    message_type: MessageType <span class="op">=</span> MessageType.BOOK</span>
-<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>    side: OrderbookSide</span>
-<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>    price: Decimal</span>
-<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>    qty: Decimal</span>
-<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a></span></code></pre></div>
+class="sourceCode python"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> send_modify_order_to_execution_engine(</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="op">*</span>,</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    sender_identifier: <span class="bu">str</span>,</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    product_id: <span class="bu">str</span>,</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    client_order_id: <span class="bu">str</span>,</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    order_id: <span class="bu">str</span> <span class="op">|</span> <span class="va">None</span> <span class="op">=</span> <span class="va">None</span>,</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    process_before: dt.datetime <span class="op">|</span> <span class="va">None</span> <span class="op">=</span> <span class="va">None</span>,</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    size: Decimal <span class="op">|</span> <span class="va">None</span> <span class="op">=</span> <span class="va">None</span>,</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    limit_price: Decimal <span class="op">|</span> <span class="va">None</span> <span class="op">=</span> <span class="va">None</span>,</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    stop_price: Decimal <span class="op">|</span> <span class="va">None</span> <span class="op">=</span> <span class="va">None</span>,</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>):</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>    ...</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a></span></code></pre></div>
 </div>
 </div>
 </section></section>
@@ -595,8 +514,8 @@ unix sockets might have been an option)</li>
 <blockquote>
 <p>the basic mechanisms are to flatten object(s) into a one-dimensional
 stream of bits, and to turn that stream of bits back into the original
-object(s). <a href="#/fn9" class="footnote-ref" id="fnref9"
-role="doc-noteref"><sup>9</sup></a></p>
+object(s). <a href="#/fn7" class="footnote-ref" id="fnref7"
+role="doc-noteref"><sup>7</sup></a></p>
 </blockquote>
 <p>possible candidates</p>
 <ul>
@@ -643,9 +562,9 @@ role="doc-noteref"><sup>9</sup></a></p>
 <li>established
 <ul>
 <li>support in all (big) programming languages exist ➡️ consumer and
-producer are language independent (used kafka-python<a href="#/fn10"
-class="footnote-ref" id="fnref10"
-role="doc-noteref"><sup>10</sup></a>)</li>
+producer are language independent (used kafka-python<a href="#/fn8"
+class="footnote-ref" id="fnref8"
+role="doc-noteref"><sup>8</sup></a>)</li>
 <li>can be used as managed service in cloud</li>
 <li>many people with experience ➡️ easier to hire</li>
 </ul></li>
@@ -680,8 +599,8 @@ role="doc-noteref"><sup>10</sup></a>)</li>
 <li>established
 <ul>
 <li>support in all (big) programming languages exist (used ormsgpack<a
-href="#/fn11" class="footnote-ref" id="fnref11"
-role="doc-noteref"><sup>11</sup></a> for python)</li>
+href="#/fn9" class="footnote-ref" id="fnref9"
+role="doc-noteref"><sup>9</sup></a> for python)</li>
 <li>backed and used by big products like redis, fluentd, pinterest</li>
 </ul></li>
 </ul>
@@ -691,9 +610,204 @@ role="doc-noteref"><sup>11</sup></a> for python)</li>
 <figure>
 <img data-src="img/high_level_architecture_kafka.png"
 style="width:80.0%" alt="" />
-<figcaption aria-hidden="true"><a href="#/fn12" class="footnote-ref"
-id="fnref12" role="doc-noteref"><sup>12</sup></a></figcaption>
+<figcaption aria-hidden="true"><a href="#/fn10" class="footnote-ref"
+id="fnref10" role="doc-noteref"><sup>10</sup></a></figcaption>
 </figure>
+</section></section>
+<section>
+<section id="marketdata-ingestion-and-processing"
+class="title-slide slide level1">
+<h1>marketdata ingestion and processing</h1>
+
+</section>
+<section class="slide level2">
+
+<p><img data-src="img/high_level_architecture_marketdata.png"
+style="width:80.0%" /></p>
+</section>
+<section id="general" class="slide level2">
+<h2>general</h2>
+<ul>
+<li>also called public data</li>
+<li>one orderbook per traded instrument</li>
+<li>essential for implementing trading strategies as current prices and
+quantities are provided</li>
+<li>mostly available as unidirectional data streams (e.g. via
+websockets, TCP or UDP)</li>
+<li>different types of data
+<ul>
+<li><strong>level 1</strong> (or top of book) data: currently best buy
+(highest) and sell (lowest) offer</li>
+<li><strong>level 2</strong> data: excerpt from orderbook with top n
+levels</li>
+<li><strong>level 3</strong> (or tick-by-tick or order-by-order) data:
+each order and its state (placed, changed, removed)</li>
+<li>usually also information about trades</li>
+</ul></li>
+<li>level 3 data contains the most detail, but also has highest volume
+and is usually most expensive</li>
+</ul>
+</section>
+<section class="slide level2">
+
+<p><img data-src="img/orderbook_btc_usd.jpg" /></p>
+</section>
+<section id="marketdata-ingestion" class="slide level2">
+<h2>marketdata ingestion</h2>
+<ul>
+<li>trading strategies should be use-able on different exchanges</li>
+<li>different exchanges have different marketdata protocols</li>
+<li>decoupling of trading system from exchanges by normalizing
+marketdata to internal format via adapter pattern<a href="#/fn11"
+class="footnote-ref" id="fnref11"
+role="doc-noteref"><sup>11</sup></a></li>
+</ul>
+</section>
+<section id="marketdata-adapter" class="slide level2">
+<h2>➡️ marketdata adapter</h2>
+<ul>
+<li>per exchange
+<ul>
+<li>receives marketdata from exchanges</li>
+<li>normalizes marketdata to internal representation</li>
+</ul></li>
+<li>forwards normalized marketdata to strategies</li>
+</ul>
+</section>
+<section id="kraken-derivatives-marketdata-adapter"
+class="slide level2">
+<h2>Kraken derivatives marketdata adapter</h2>
+<ul>
+<li>subscribes to marketdata for different instruments
+<ul>
+<li>via websocket</li>
+<li>exchange sends JSON (use orjson<a href="#/fn12" class="footnote-ref"
+id="fnref12" role="doc-noteref"><sup>12</sup></a> for fast parsing)</li>
+</ul></li>
+<li>L2 marketdata ➡️ orderbook levels
+<ul>
+<li>on connect a <em>snapshot</em> is received: the whole orderbook</li>
+<li>consecutive messages are <em>deltas</em>: what changes to levels
+ocurred compared to previous message</li>
+</ul></li>
+<li>received marketdata is processed and sent to strategies
+<ul>
+<li>not only transformation, but also keeps track of orderbooks</li>
+<li>sends each N minutes a snapshot to the strategies</li>
+</ul></li>
+</ul>
+</section>
+<section class="slide level2">
+
+<h3 id="snapshot-message">Snapshot message</h3>
+<aside class="notes">
+<p>if somebody knows how to center this arrow in pandoc, please write me
+a message</p>
+</aside>
+<div class="columns" data-align="center">
+<div class="column" style="width:35%;">
+<p>kraken futures</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;feed&quot;</span><span class="fu">:</span> <span class="st">&quot;book_snapshot&quot;</span><span class="fu">,</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;product_id&quot;</span><span class="fu">:</span> <span class="st">&quot;PI_ETHUSD&quot;</span><span class="fu">,</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;timestamp&quot;</span><span class="fu">:</span> <span class="dv">1744550040435</span><span class="fu">,</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;seq&quot;</span><span class="fu">:</span> <span class="dv">528862</span><span class="fu">,</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;tickSize&quot;</span><span class="fu">:</span> <span class="kw">null</span><span class="fu">,</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;bids&quot;</span><span class="fu">:</span> <span class="ot">[</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>        <span class="fu">{</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>            <span class="dt">&quot;price&quot;</span><span class="fu">:</span> <span class="fl">1556.2</span><span class="fu">,</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>            <span class="dt">&quot;qty&quot;</span><span class="fu">:</span> <span class="fl">200.0</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>        <span class="fu">}</span><span class="ot">,</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    <span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>    <span class="er">...</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;asks&quot;</span><span class="fu">:</span> <span class="ot">[</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>        <span class="fu">{</span></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>            <span class="dt">&quot;price&quot;</span><span class="fu">:</span> <span class="fl">1556.825</span><span class="fu">,</span></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>            <span class="dt">&quot;qty&quot;</span><span class="fu">:</span> <span class="fl">184.0</span></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>        <span class="fu">}</span><span class="ot">,</span></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>        <span class="er">...</span></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>    <span class="ot">]</span></span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+</div><div class="column" style="width:5%;">
+<p>➡️</p>
+</div><div class="column" style="width:60%;">
+<p>internal representation</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> BaseMessage(BaseModel):</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    message_type: MessageType</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> BookBase(BaseMessage):</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    timestamp: <span class="bu">int</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    seq: <span class="bu">int</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    product_id: <span class="bu">str</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> OrderBookEntry(BaseModel):</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>    price: Decimal</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>    qty: Decimal</span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> BookSnapshot(BookBase):</span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>    message_type: MessageType <span class="op">=</span> MessageType.BOOK_SNAPSHOT</span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>    tickSize: Optional[Decimal]</span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>    bids: <span class="bu">list</span>[OrderBookEntry]</span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>    asks: <span class="bu">list</span>[OrderBookEntry]</span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a></span></code></pre></div>
+</div>
+</div>
+</section>
+<section class="slide level2">
+
+<h3 id="delta-message">Delta message</h3>
+<div class="columns" data-align="center">
+<div class="column" style="width:35%;">
+<p>kraken futures</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;feed&quot;</span><span class="fu">:</span> <span class="st">&quot;book&quot;</span><span class="fu">,</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;product_id&quot;</span><span class="fu">:</span> <span class="st">&quot;PI_ETHUSD&quot;</span><span class="fu">,</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;side&quot;</span><span class="fu">:</span> <span class="st">&quot;sell&quot;</span><span class="fu">,</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;seq&quot;</span><span class="fu">:</span> <span class="dv">533776</span><span class="fu">,</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;price&quot;</span><span class="fu">:</span> <span class="fl">1596.8</span><span class="fu">,</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;qty&quot;</span><span class="fu">:</span> <span class="fl">200.0</span><span class="fu">,</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;timestamp&quot;</span><span class="fu">:</span> <span class="dv">1744551637145</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;feed&quot;</span><span class="fu">:</span> <span class="st">&quot;book&quot;</span><span class="fu">,</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;product_id&quot;</span><span class="fu">:</span> <span class="st">&quot;PI_ETHUSD&quot;</span><span class="fu">,</span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;side&quot;</span><span class="fu">:</span> <span class="st">&quot;sell&quot;</span><span class="fu">,</span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;seq&quot;</span><span class="fu">:</span> <span class="dv">533777</span><span class="fu">,</span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;price&quot;</span><span class="fu">:</span> <span class="fl">1595.7</span><span class="fu">,</span></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;qty&quot;</span><span class="fu">:</span> <span class="fl">0.0</span><span class="fu">,</span></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;timestamp&quot;</span><span class="fu">:</span> <span class="dv">1744551641794</span></span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+</div><div class="column" style="width:5%;">
+<p>➡️</p>
+</div><div class="column" style="width:60%;">
+<p>internal representation</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> BaseMessage(BaseModel):</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    message_type: MessageType</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> BookBase(BaseMessage):</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    timestamp: <span class="bu">int</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    seq: <span class="bu">int</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    product_id: <span class="bu">str</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> OrderbookSide(StrEnum):</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>    BUY <span class="op">=</span> <span class="st">&quot;buy&quot;</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>    SELL <span class="op">=</span> <span class="st">&quot;sell&quot;</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> BookDelta(BookBase):</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>    message_type: MessageType <span class="op">=</span> MessageType.BOOK</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>    side: OrderbookSide</span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>    price: Decimal</span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>    qty: Decimal</span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a></span></code></pre></div>
+</div>
+</div>
 </section></section>
 <section>
 <section id="order-management-and-execution"
@@ -703,7 +817,7 @@ class="title-slide slide level1">
 </section>
 <section class="slide level2">
 
-<p><img data-src="img/high_level_architecture_kafka_order_execution.png"
+<p><img data-src="img/high_level_architecture_order_execution.png"
 style="width:80.0%" /></p>
 </section>
 <section id="sending-orders" class="slide level2">
@@ -792,8 +906,118 @@ to exchange</li>
 strategies</li>
 </ul>
 </section>
-<section id="todo-add-code-and-json-excerpts" class="slide level2">
-<h2>TODO: add code and JSON excerpts</h2>
+<section class="slide level2">
+
+<h3 id="new-order-request">new order request</h3>
+<aside class="notes">
+<ul>
+<li>action_type assignment on next line for better readability</li>
+</ul>
+</aside>
+<div class="columns">
+<div class="column" style="width:55%;">
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> OrderBase(BaseModel):</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    action_type: OrderActionType</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    sender_id: <span class="bu">str</span> <span class="op">=</span> UNKNOWN_SENDER_ID</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    product_id: <span class="bu">str</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    client_order_id: <span class="bu">str</span> <span class="op">|</span> <span class="va">None</span> <span class="op">=</span> <span class="va">None</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> NewOrder(OrderBase):</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>    action_type: OrderActionType <span class="op">=</span> </span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>        OrderActionType.NEW_ORDER</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>    side: OrderbookSide</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>    order_type: OrderType</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>    size: Decimal</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>    limit_price: Decimal</span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>    stop_price: Decimal <span class="op">|</span> <span class="va">None</span> <span class="op">=</span> <span class="va">None</span></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a></span></code></pre></div>
+</div><div class="column" style="width:5%;">
+<p>➡️</p>
+</div><div class="column" style="width:40%;">
+<pre><code>orderType=lmt&amp;symbol=PI_XBTUSD&amp;
+side=buy&amp;size=1&amp;limitPrice=84389.0
+&amp;cliOrdId=...</code></pre>
+<p>OR</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;orderType&quot;</span><span class="fu">:</span> <span class="st">&quot;lmt&quot;</span><span class="fu">,</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;symbol&quot;</span><span class="fu">:</span> <span class="st">&quot;PI_XBTUSD&quot;</span><span class="fu">,</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;side&quot;</span><span class="fu">:</span> <span class="st">&quot;buy&quot;</span><span class="fu">,</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;size&quot;</span><span class="fu">:</span> <span class="dv">1</span><span class="fu">,</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;limitPrice&quot;</span><span class="fu">:</span> <span class="fl">84389.0</span><span class="fu">,</span> </span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;cliOrdId&quot;</span><span class="fu">:</span> <span class="st">&quot;...&quot;</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+</div>
+</div>
+</section>
+<section class="slide level2">
+
+<h3 id="fill-response-message">fill response message</h3>
+<aside class="notes">
+<ul>
+<li>response_type assignment on next line for better readability</li>
+</ul>
+</aside>
+<div class="columns">
+<div class="column" style="width:40%;">
+<p>kraken futures</p>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;feed&quot;</span><span class="fu">:</span> <span class="st">&quot;fills&quot;</span><span class="fu">,</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;username&quot;</span><span class="fu">:</span> <span class="st">&quot;...&quot;</span><span class="fu">,</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;fills&quot;</span><span class="fu">:</span> <span class="ot">[</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>        <span class="fu">{</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>            <span class="dt">&quot;instrument&quot;</span><span class="fu">:</span> <span class="st">&quot;PI_XBTUSD&quot;</span><span class="fu">,</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>            <span class="dt">&quot;time&quot;</span><span class="fu">:</span> <span class="dv">1744729661598</span><span class="fu">,</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>            <span class="dt">&quot;price&quot;</span><span class="fu">:</span> <span class="fl">84889.0</span><span class="fu">,</span></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>            <span class="dt">&quot;seq&quot;</span><span class="fu">:</span> <span class="dv">100</span><span class="fu">,</span></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>            <span class="dt">&quot;buy&quot;</span><span class="fu">:</span> <span class="kw">true</span><span class="fu">,</span></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>            <span class="dt">&quot;qty&quot;</span><span class="fu">:</span> <span class="fl">1.0</span><span class="fu">,</span></span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>            <span class="dt">&quot;remaining_order_qty&quot;</span><span class="fu">:</span> <span class="fl">0.0</span><span class="fu">,</span></span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>            <span class="dt">&quot;order_id&quot;</span><span class="fu">:</span> <span class="st">&quot;...&quot;</span><span class="fu">,</span></span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>            <span class="dt">&quot;cli_ord_id&quot;</span><span class="fu">:</span> <span class="st">&quot;...&quot;</span><span class="fu">,</span></span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>            <span class="dt">&quot;fill_id&quot;</span><span class="fu">:</span> <span class="st">&quot;...&quot;</span><span class="fu">,</span></span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>            <span class="dt">&quot;fill_type&quot;</span><span class="fu">:</span> <span class="st">&quot;taker&quot;</span><span class="fu">,</span></span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a>            <span class="dt">&quot;fee_paid&quot;</span><span class="fu">:</span> <span class="fl">5.9e-09</span><span class="fu">,</span></span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a>            <span class="dt">&quot;fee_currency&quot;</span><span class="fu">:</span> <span class="st">&quot;BTC&quot;</span><span class="fu">,</span></span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a>            <span class="dt">&quot;taker_order_type&quot;</span><span class="fu">:</span> <span class="st">&quot;lmt&quot;</span><span class="fu">,</span></span>
+<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a>            <span class="dt">&quot;order_type&quot;</span><span class="fu">:</span> <span class="st">&quot;lmt&quot;</span></span>
+<span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a>        <span class="fu">}</span></span>
+<span id="cb11-22"><a href="#cb11-22" aria-hidden="true" tabindex="-1"></a>    <span class="ot">]</span></span>
+<span id="cb11-23"><a href="#cb11-23" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+</div><div class="column" style="width:5%;">
+<p>➡️</p>
+</div><div class="column" style="width:55%;">
+<p>internal representation</p>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> OrderResponse(BaseModel):</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    response_type: OrderActionType</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    sender_id: <span class="bu">str</span> <span class="op">=</span> UNKNOWN_SENDER_ID</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    product_id: <span class="bu">str</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>    client_order_id: <span class="bu">str</span> <span class="op">|</span> <span class="va">None</span> <span class="op">=</span> <span class="va">None</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>    order_id: <span class="bu">str</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>    side: OrderbookSide</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>    size: Decimal</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>    price: Decimal</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Fill(OrderResponse):</span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>    response_type: OrderActionType <span class="op">=</span> </span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>        OrderActionResponseType.FILL</span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>    time: <span class="bu">int</span></span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>    fill_id: <span class="bu">str</span></span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>    remaining_size: Decimal</span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a></span></code></pre></div>
+</div>
+</div>
 </section>
 <section id="order-handling-caveats" class="slide level2">
 <h2>order handling caveats</h2>
@@ -820,14 +1044,9 @@ help (if allowed)</li>
 </ul></li>
 </ul>
 </section></section>
-<section id="implementation-of-trading-strategies"
+<section id="data-storage-and-post-trade-analysis"
 class="title-slide slide level1">
-<h1>implementation of trading strategies</h1>
-
-</section>
-
-<section id="post-trade-analysis" class="title-slide slide level1">
-<h1>post-trade analysis</h1>
+<h1>data storage and post-trade analysis</h1>
 
 </section>
 
@@ -865,27 +1084,27 @@ href="https://demo-futures.kraken.com/futures">Kraken futures simulation
 environment, accessed 2025-04-12, 18:20</a></em><a href="#/fnref6"
 class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 <li id="fn7"><p><em><a
-href="https://refactoring.guru/design-patterns/adapter">Adapter design
-pattern, accessed 2025-04-12, 19:40</a></em><a href="#/fnref7"
-class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn8"><p><em><a href="https://github.com/ijl/orjson">orjson,
-accessed 2025-04-13 15:40</a></em><a href="#/fnref8"
-class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn9"><p><em><a
 href="https://isocpp.org/wiki/faq/serialization">Serialization, accessed
-2025-04-13, 16:40</a></em><a href="#/fnref9" class="footnote-back"
+2025-04-13, 16:40</a></em><a href="#/fnref7" class="footnote-back"
+role="doc-backlink">↩︎</a></p></li>
+<li id="fn8"><p><em><a
+href="https://github.com/dpkp/kafka-python">kafka-python, accessed
+2025-04-13 16:50</a></em><a href="#/fnref8" class="footnote-back"
+role="doc-backlink">↩︎</a></p></li>
+<li id="fn9"><p><em><a
+href="https://github.com/aviramha/ormsgpack">ormsgpack, accessed
+2025-04-13 16:50</a></em><a href="#/fnref9" class="footnote-back"
 role="doc-backlink">↩︎</a></p></li>
 <li id="fn10"><p><em><a
-href="https://github.com/dpkp/kafka-python">kafka-python, accessed
-2025-04-13 16:50</a></em><a href="#/fnref10" class="footnote-back"
-role="doc-backlink">↩︎</a></p></li>
-<li id="fn11"><p><em><a
-href="https://github.com/aviramha/ormsgpack">ormsgpack, accessed
-2025-04-13 16:50</a></em><a href="#/fnref11" class="footnote-back"
-role="doc-backlink">↩︎</a></p></li>
-<li id="fn12"><p><em><a
 href="https://de.m.wikipedia.org/wiki/Datei:Apache_Kafka_logo.svg">kafka
-logo, accessed 2025-04-13 17:51</a></em><a href="#/fnref12"
+logo, accessed 2025-04-13 17:51</a></em><a href="#/fnref10"
+class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn11"><p><em><a
+href="https://refactoring.guru/design-patterns/adapter">Adapter design
+pattern, accessed 2025-04-12, 19:40</a></em><a href="#/fnref11"
+class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn12"><p><em><a href="https://github.com/ijl/orjson">orjson,
+accessed 2025-04-13 15:40</a></em><a href="#/fnref12"
 class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 <li id="fn13"><p><em><a
 href="https://refactoring.guru/design-patterns/adapter">Adapter design
