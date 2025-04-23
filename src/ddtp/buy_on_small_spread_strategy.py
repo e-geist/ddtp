@@ -21,7 +21,8 @@ def process_orderbook_event(event: BookSnapshot | BookDelta):
         book = Orderbook(event.product_id)
         books[event.product_id] = book
     book.apply_event(event)
-    logger.debug(f"Book: {event.product_id}: {book}")
+    if book.is_initialized:
+        logger.debug(f"Book: {event.product_id}: {book}")
 
 
 def process_trade_event(event: TradeSnapshot | TradeDelta):
