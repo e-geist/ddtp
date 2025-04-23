@@ -119,9 +119,9 @@ I want to
 - trade 
   - on different exchanges (extensibility + scalability)
   - multiple instruments (scalability)
-  - using different approaches/algorithms (Extensibility + scalability)
-- have recordings about performed actions (Transparency + Compliance)
-- be sufficiently fast to trade properly (Performance + Throughput)
+  - using different approaches/algorithms (extensibility + scalability)
+- have recordings about performed actions (transparency + compliance)
+- be sufficiently fast to trade properly (performance + throughput)
 
 ## technical requirements
 I need for trading
