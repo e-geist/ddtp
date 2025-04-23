@@ -8,6 +8,7 @@ authors = [
 ]
 requires-python = ">=3.13.1"
 dependencies = [
+    "pydantic>=2.10.6",
     "websocket-client>=1.8.0",
 ]
 
@@ -22,3 +23,6 @@ build-backend = "hatchling.build"
 dev = [
     "ruff>=0.9.6",
 ]
+
+[tool.hatch.build.targets.wheel]
+      packages = ["src/ddtp"]
