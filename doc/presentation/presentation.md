@@ -180,7 +180,7 @@ most exchanges have a simulation environment, that can be used for testing - als
 
 - based on a signal a decision is made to act on a market
 - most important signals, that need to be provided
-  - marktdata
+  - marketdata
   - feedback for own orders
   - own position
   - for derivatives: data of underlying assets (live or forecasts)
@@ -328,7 +328,7 @@ possible candidates
 
 ::: notes
 
-- more in-depth reasons in Github repo of presentation
+- more in-depth reasons in GitHub repo of presentation
 
 :::
 
@@ -355,12 +355,12 @@ possible candidates
 
 - of course not established as JSON
 - biggest reason against JSON: size
-- more in-depth reasons in Github repo of presentation
+- more in-depth reasons in GitHub repo of presentation
 
 :::
 
 - allows conversion of arbitrary objects to bytes and back
-- schemalass (e.g. in contrast to protobuf)
+- schemaless (e.g. in contrast to protobuf)
 - fast
 - established
   - support in all (big) programming languages exist (used ormsgpack[^11] for python)
@@ -425,7 +425,7 @@ possible candidates
   - exchange sends JSON (use orjson[^8] for fast parsing)
 - L2 marketdata ➡️ orderbook levels
   - on connect a _snapshot_ is received: the whole orderbook 
-  - consecutive messages are _deltas_: what changes to levels ocurred compared to previous message
+  - consecutive messages are _deltas_: what changes to levels occurred compared to previous message
 - received marketdata is processed and sent to strategies
   - not only transformation, but also keeps track of orderbooks
   - sends each N minutes a snapshot to the strategies
@@ -455,7 +455,7 @@ kraken futures
         {
             "price": 1556.2,
             "qty": 200.0
-        },
+        }
     ],
     ...
     "asks": [
@@ -618,7 +618,7 @@ class BookDelta(BookBase):
 - feedback via websocket or REST polling ➡️ for proof of concept websocket was selected
   - same websocket endpoint as for marketdata adapter
   - on connect a _snapshot_ of the subscribed data is received
-  - consecutive messages are _deltas_: what changes to data ocurred compared to previous message
+  - consecutive messages are _deltas_: what changes to data occurred compared to previous message
 - order actions received from strategies are converted and forwarded to exchange
 - feedback received from exchange is normalized and forwarded to strategies
 
@@ -833,7 +833,7 @@ outside of live trading
 :::
 ::::::::::::::
 
-- de-facto standard for longterm storage of big data volumes
+- de-facto standard for long term storage of big data volumes
 - supported by all big analysis systems and programming languages
 
 ---
@@ -888,5 +888,5 @@ outside of live trading
   - filing taxes
   - depending on market regulations paper-trail is needed: which trade was done with which version of which software?
 
-# repo
+# thank you for listening!
 https://github.com/e-geist/ddtp

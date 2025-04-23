@@ -723,7 +723,7 @@ testing - also Kraken futures<a href="#/fn6" class="footnote-ref" id="fnref6" ro
 market</li>
 <li class="fragment">most important signals, that need to be provided
 <ul>
-<li class="fragment">marktdata</li>
+<li class="fragment">marketdata</li>
 <li class="fragment">feedback for own orders</li>
 <li class="fragment">own position</li>
 <li class="fragment">for derivatives: data of underlying assets (live or
@@ -888,7 +888,7 @@ object(s). <a href="#/fn7" class="footnote-ref" id="fnref7" role="doc-noteref"><
 <h2>why kafka</h2>
 <aside class="notes">
 <ul>
-<li>more in-depth reasons in Github repo of presentation</li>
+<li>more in-depth reasons in GitHub repo of presentation</li>
 </ul>
 </aside>
 <ul>
@@ -923,13 +923,13 @@ are gone</li>
 <ul>
 <li>of course not established as JSON</li>
 <li>biggest reason against JSON: size</li>
-<li>more in-depth reasons in Github repo of presentation</li>
+<li>more in-depth reasons in GitHub repo of presentation</li>
 </ul>
 </aside>
 <ul>
 <li class="fragment">allows conversion of arbitrary objects to bytes and
 back</li>
-<li class="fragment">schemalass (e.g. in contrast to protobuf)</li>
+<li class="fragment">schemaless (e.g. in contrast to protobuf)</li>
 <li class="fragment">fast</li>
 <li class="fragment">established
 <ul>
@@ -1021,7 +1021,7 @@ for fast parsing)</li>
 <li class="fragment">on connect a <em>snapshot</em> is received: the
 whole orderbook</li>
 <li class="fragment">consecutive messages are <em>deltas</em>: what
-changes to levels ocurred compared to previous message</li>
+changes to levels occurred compared to previous message</li>
 </ul></li>
 <li class="fragment">received marketdata is processed and sent to
 strategies
@@ -1053,7 +1053,7 @@ a message</p>
 <span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>        <span class="fu">{</span></span>
 <span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>            <span class="dt">&quot;price&quot;</span><span class="fu">:</span> <span class="fl">1556.2</span><span class="fu">,</span></span>
 <span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>            <span class="dt">&quot;qty&quot;</span><span class="fu">:</span> <span class="fl">200.0</span></span>
-<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>        <span class="fu">}</span><span class="ot">,</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>        <span class="fu">}</span></span>
 <span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    <span class="ot">]</span><span class="fu">,</span></span>
 <span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>    <span class="er">...</span></span>
 <span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;asks&quot;</span><span class="fu">:</span> <span class="ot">[</span></span>
@@ -1238,7 +1238,7 @@ adapter</li>
 <li class="fragment">on connect a <em>snapshot</em> of the subscribed
 data is received</li>
 <li class="fragment">consecutive messages are <em>deltas</em>: what
-changes to data ocurred compared to previous message</li>
+changes to data occurred compared to previous message</li>
 </ul></li>
 <li class="fragment">order actions received from strategies are
 converted and forwarded to exchange</li>
@@ -1472,7 +1472,7 @@ compression</li>
 </div>
 </div>
 <ul>
-<li class="fragment">de-facto standard for longterm storage of big data
+<li class="fragment">de-facto standard for long term storage of big data
 volumes</li>
 <li class="fragment">supported by all big analysis systems and
 programming languages</li>
@@ -1569,8 +1569,8 @@ needed: which trade was done with which version of which software?</li>
 </ul></li>
 </ul>
 </section></section>
-<section id="repo" class="title-slide slide level1">
-<h1>repo</h1>
+<section id="thank-you-for-listening" class="title-slide slide level1">
+<h1>thank you for listening!</h1>
 <p>https://github.com/e-geist/ddtp</p>
 </section>
 
