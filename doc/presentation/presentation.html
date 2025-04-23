@@ -30,6 +30,34 @@
     .display.math{display: block; text-align: center; margin: 0.5rem auto;}
   </style>
   <link rel="stylesheet" href="https://unpkg.com/reveal.js@^4//dist/theme/black.css" id="theme">
+  <style>
+  .slides {
+      font-size: 0.60em;
+  }
+  .reveal ul {
+      display: block;
+  }
+  .reveal ol {
+      display: block;
+  }
+
+  img {
+      width:30%;
+  }
+
+  figcaption {
+      font-size: 0.6em !important;
+      font-style: italic !important;
+  }
+
+  .subtitle {
+      font-style: italic !important;
+  }
+
+  .date {
+      font-size: 0.75em !important;
+  }
+  </style>
 </head>
 <body>
   <div class="reveal">
@@ -42,9 +70,25 @@ data-background-image="front.png">
 </section>
 <section id="about-me" class="title-slide slide level1">
 <h1>about me</h1>
-<p>Software and Data Engineering Freelancer</p>
-<p><a href="mail@eugengeist.com">mail@eugengeist.com</a></p>
-<p><a href="https://eugengeist.com">https://eugengeist.com</a></p>
+<div class="columns">
+<div class="column" style="width:50%;">
+<p><img data-src="me.jpg" /></p>
+</div><div class="column" style="width:50%;">
+<ul>
+<li>Software and Data Engineering Freelancer
+<ul>
+<li>~5 years of experience in exchange trading</li>
+<li>other industries: Infrastructure, automotive, logistics</li>
+</ul></li>
+<li>contact
+<ul>
+<li><a href="mail@eugengeist.com">mail@eugengeist.com</a></li>
+<li><a
+href="linkedin.com/in/eugen-geist/">linkedin.com/in/eugen-geist/</a></li>
+</ul></li>
+</ul>
+</div>
+</div>
 </section>
 
 <section id="agenda" class="title-slide slide level1">
@@ -124,6 +168,7 @@ role="doc-noteref"><sup>3</sup></a></p>
 </blockquote>
 <ul>
 <li>also used for trading crypto or commodities (e.g. electricity)</li>
+<li>usually use orders and orderbooks for trading</li>
 </ul>
 </section>
 <section id="orderbook" class="slide level2">
@@ -145,8 +190,7 @@ role="doc-noteref"><sup>4</sup></a></p>
 </section>
 <section class="slide level2">
 
-<p><img data-src="orderbook_btc_usd.jpg"
-style="width:40.0%;height:40.0%" /></p>
+<p><img data-src="orderbook_btc_usd.jpg" /></p>
 </section>
 <section id="trades-and-positions" class="slide level2">
 <h2>trades and positions</h2>
@@ -167,12 +211,37 @@ specific good -&gt; how much do I actually have of a good</li>
 <li>position: How much I have of a good</li>
 </ul>
 </section></section>
+<section>
 <section id="functional-and-non-functional-requirements"
 class="title-slide slide level1">
 <h1>functional and non-functional requirements</h1>
 
 </section>
-
+<section id="functional-requirements" class="slide level2">
+<h2>functional requirements</h2>
+<p>I want to</p>
+<ul>
+<li>be able to trade goods with different algorithms on an exchange</li>
+<li>get insights about how I traded</li>
+<li>improve my trading systematically</li>
+</ul>
+</section>
+<section id="non-functional-requirements" class="slide level2">
+<h2>non-functional requirements</h2>
+<p>I want to</p>
+<ul>
+<li>trade
+<ul>
+<li>on different exchanges (Extensibility + Scalability)</li>
+<li>multiple goods (Scalability)</li>
+<li>using different (Extensibility + Scalability)</li>
+</ul></li>
+<li>have recordings about performed actions (Transparency +
+Compliance)</li>
+<li>be sufficiently fast to trade properly (Performance +
+Throughput)</li>
+</ul>
+</section></section>
 <section id="market-data-ingestion-and-processing"
 class="title-slide slide level1">
 <h1>market data ingestion and processing</h1>

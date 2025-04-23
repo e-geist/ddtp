@@ -8,12 +8,19 @@ title-slide-attributes:
 ## {background-image="front.png"}
 
 # about me
-
-Software and Data Engineering Freelancer
-
-[mail@eugengeist.com](mail@eugengeist.com)
-
-[https://eugengeist.com](https://eugengeist.com)
+:::::::::::::: {.columns}
+::: {.column width="50%"}
+![](me.jpg)
+:::
+::: {.column width="50%"}
+- Software and Data Engineering Freelancer
+  - ~5 years of experience in exchange trading
+  - other industries: Infrastructure, automotive, logistics
+- contact 
+  - [mail@eugengeist.com](mail@eugengeist.com)
+  - [linkedin.com/in/eugen-geist/](linkedin.com/in/eugen-geist/)
+:::
+::::::::::::::
 
 # agenda
 
@@ -65,6 +72,7 @@ Software and Data Engineering Freelancer
 [^4]:_[Collins dictionary, accessed 2025-03-04, 20:40](https://www.collinsdictionary.com/de/worterbuch/englisch/algorithmic-trading)_
 
 - also used for trading crypto or commodities (e.g. electricity)
+- usually use orders and orderbooks for trading
 
 ## orderbook
 >... order book refers to an electronic list of buy and sell orders for a specific security or financial instrument organized by price level.[^3]
@@ -77,7 +85,7 @@ Software and Data Engineering Freelancer
     - identifier
 
 ---
-![](orderbook_btc_usd.jpg){ width=40% height=40% }
+![](orderbook_btc_usd.jpg)
 
 ## trades and positions
 - **trade**: an order that was *executed* -> somebody else matched your order and you actually bought/sold a good
@@ -91,6 +99,23 @@ Software and Data Engineering Freelancer
 
 
 # functional and non-functional requirements
+
+## functional requirements
+I want to
+
+- be able to trade goods with different algorithms on an exchange 
+- get insights about how I traded 
+- improve my trading systematically
+
+## non-functional requirements
+I want to
+
+- trade 
+  - on different exchanges (Extensibility + Scalability)
+  - multiple goods (Scalability)
+  - using different (Extensibility + Scalability)
+- have recordings about performed actions (Transparency + Compliance)
+- be sufficiently fast to trade properly (Performance + Throughput)
 
 # market data ingestion and processing
 

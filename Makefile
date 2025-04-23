@@ -1,5 +1,5 @@
 presentation-standalone:
-	pandoc -t revealjs --embed-resources -s doc/presentation/presentation.md -o doc/presentation/presentation-standalone.html
+	pandoc -t revealjs --include-in-header doc/presentation/slides.css --slide-level 2 --embed-resources -s doc/presentation/presentation.md -o doc/presentation/presentation-standalone.html
 
 presentation:
-	pandoc -t revealjs --slide-level 2 -s doc/presentation/presentation.md -o doc/presentation/presentation.html
+	pandoc -t revealjs --include-in-header doc/presentation/slides.css --slide-level 2 -s doc/presentation/presentation.md -o doc/presentation/presentation.html
