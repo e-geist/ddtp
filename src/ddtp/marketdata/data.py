@@ -12,7 +12,7 @@ class FeedType(StrEnum):
     TRADE_SNAPSHOT = "trade_snapshot"
 
 
-class OrderBookSide(StrEnum):
+class OrderbookSide(StrEnum):
     BUY = "buy"
     SELL = "sell"
 
@@ -53,7 +53,7 @@ class BookSnapshot(BookBase):
 
 class BookDelta(BookBase):
     feed: FeedType = FeedType.BOOK
-    side: OrderBookSide
+    side: OrderbookSide
     price: Decimal
     qty: Decimal
 
@@ -64,7 +64,7 @@ class TradeBase(BaseMessage):
 
 class TradeData(BaseModel):
     uid: str
-    side: OrderBookSide
+    side: OrderbookSide
     type: TradeType
     seq: int
     time: int

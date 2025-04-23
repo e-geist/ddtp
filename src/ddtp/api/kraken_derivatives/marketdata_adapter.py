@@ -1,5 +1,6 @@
 """Converts Kraken derivatives specific marketdata to internal marketdata representation."""
 
+import logging
 import os
 from multiprocessing import Queue
 from typing import Any, Callable
@@ -14,6 +15,8 @@ from ddtp.marketdata.data import (
     TradeDelta,
     TradeSnapshot,
 )
+
+logger = logging.getLogger(__name__)
 
 
 def _get_marketdata_parser(queue: Queue) -> Callable[[dict[str, Any]], None]:
@@ -44,6 +47,7 @@ def _get_marketdata_parser(queue: Queue) -> Callable[[dict[str, Any]], None]:
 def _start_websocket(product_ids: list[str], queue: Queue) -> KrakenDerivWebSocket:
     api_key = os.getenv(KrakenApiEnvVars.API_KEY)
     api_secret = os.getenv(KrakenApiEnvVars.API_SECRET)
+    logger.info("(re)starting websocket connection")
     ws = KrakenDerivWebSocket(
         os.getenv(KrakenApiEnvVars.WS_BASE_URL),
         _get_marketdata_parser(queue),
