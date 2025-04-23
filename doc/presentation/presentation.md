@@ -14,7 +14,7 @@ author: Eugen Geist
 ::: {.column width="50%"}
 - Software and Data Engineering Freelancer
   - ~5 years of experience in exchange trading
-  - other industries: Infrastructure, automotive, logistics
+  - other industries: infrastructure, automotive, logistics
 - contact 
   - [mail@eugengeist.com](mail@eugengeist.com)
   - [linkedin.com/in/eugen-geist/](linkedin.com/in/eugen-geist/)
@@ -30,7 +30,7 @@ author: Eugen Geist
 - component communication
 - marketdata ingestion and processing
 - order management and execution
-- data storage and post-trade analysis
+- data storage
 - outlook
 
 # motivation
@@ -763,7 +763,7 @@ class Fill(OrderResponse):
   - act proactively (e.g. don't send cancel for filled order)
   - keep track of rate limits and allow cancels in emergencies
 
-# data storage and post-trade analysis
+# data storage
 
 ---
 
@@ -773,7 +773,7 @@ class Fill(OrderResponse):
 
 ## characteristics - what is the data needed for?
 
-Differentiation mainly comes down to usage
+differentiation mainly comes down to usage
 
 :::::::::::::: {.columns}
 ::: {.column width="50%"}
@@ -810,7 +810,8 @@ outside of live trading
   - publish most recent state regularly
   - read most recent n messages and process to find desired state
   - biggest disadvantage: retrieval might get finicky in a system with a lot of participants
-- TODO: add what was used for poc
+- for poc none of both were implemented (yet), due to need to cut scope ;)
+  - but would implement kafka approach due to kafka already being used
 
 ## outside of live trading
 
@@ -846,6 +847,7 @@ outside of live trading
   - order actions (new order, modify, cancel)
   - order feedback (acknowledgements, cancel)
   - trades/fills
+- for poc none of both were implemented (yet), due to need to cut scope ;)
 
 # outlook
 
@@ -886,4 +888,6 @@ outside of live trading
   - depending on market regulations paper-trail is needed: which trade was done with which version of which software?
 
 # thank you for listening!
-https://github.com/e-geist/ddtp
+
+# repo
+![https://github.com/e-geist/ddtp](img/qrcode_github.png)
