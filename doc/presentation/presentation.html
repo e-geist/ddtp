@@ -1119,6 +1119,7 @@ relevant</li>
 <ul>
 <li class="fragment">current strategy positions</li>
 <li class="fragment">current active orders</li>
+<li class="fragment">global risk exposure</li>
 </ul></li>
 </ul>
 </div><div class="column" style="width:50%;">
@@ -1222,24 +1223,15 @@ results</li>
 </ul>
 </aside>
 <ul>
-<li class="fragment"><strong>software tests</strong>
+<li class="fragment"><strong>implement configurations</strong> -
+e.g. which marketdata and which order execution adapter to use</li>
+<li class="fragment"><strong>software tests</strong>: very important as
+software can lose very fast a lot of money
 <ul>
-<li class="fragment">integration and unit tests</li>
-<li class="fragment">very important as software can lose very fast a lot
-of money</li>
+<li class="fragment">unit and integration tests</li>
 <li class="fragment"><a
 href="https://www.henricodolfing.com/2019/06/project-failure-case-study-knight-capital.html">infamous
 knight capital case of $440 million software error</a></li>
-</ul></li>
-<li class="fragment"><strong>emergency mechanisms</strong>
-<ul>
-<li class="fragment">how to handle disconnects of single
-components?</li>
-<li class="fragment">how to handle global risk management?</li>
-<li class="fragment">how to handle big market shifts?</li>
-<li class="fragment">how to handle unintended big trading volumes?</li>
-<li class="fragment">➡️ often better not to trade, than to trade
-wrong</li>
 </ul></li>
 <li class="fragment"><strong>logging and alerting</strong></li>
 <li class="fragment"><strong>where to host?</strong> ➡️ depends on
@@ -1249,6 +1241,14 @@ market type and market itself
 around the world close to the exchanges</li>
 <li class="fragment">crypto: mostly in clouds close to crypto
 exchanges</li>
+</ul></li>
+<li class="fragment"><strong>emergency mechanisms</strong>
+<ul>
+<li class="fragment">how to handle failures of single components?</li>
+<li class="fragment">how to handle global risk management?</li>
+<li class="fragment">…</li>
+<li class="fragment">➡️ often better not to trade, than to trade
+wrong</li>
 </ul></li>
 <li class="fragment"><strong>fine-tuning depending on markets</strong>
 <ul>

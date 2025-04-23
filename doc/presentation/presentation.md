@@ -861,20 +861,19 @@ outside of live trading
 
 :::
 
-- **software tests**
-  - integration and unit tests
-  - very important as software can lose very fast a lot of money
+- **implement configurations** - e.g. which marketdata and which order execution adapter to use
+- **software tests**: very important as software can lose very fast a lot of money
+  - unit and integration  tests
   - [infamous knight capital case of $440 million software error](https://www.henricodolfing.com/2019/06/project-failure-case-study-knight-capital.html)
-- **emergency mechanisms**
-  - how to handle disconnects of single components?
-  - how to handle global risk management?
-  - how to handle big market shifts?
-  - how to handle unintended big trading volumes?
-  - ➡️ often better not to trade, than to trade wrong
 - **logging and alerting**
 - **where to host?** ➡️ depends on market type and market itself
   - finance: mostly hosted on-prem in data-centers around the world close to the exchanges
   - crypto: mostly in clouds close to crypto exchanges
+- **emergency mechanisms**
+  - how to handle failures of single components?
+  - how to handle global risk management?
+  - ...
+  - ➡️ often better not to trade, than to trade wrong
 - **fine-tuning depending on markets**
   - timing and latency of order and strategy actions
   - storage and retention
