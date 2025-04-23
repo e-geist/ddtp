@@ -17,7 +17,7 @@ dependencies = [
 
 [project.scripts]
 marketdata_provider = "ddtp.marketdata_provider:main"
-strategy = "ddtp.strategy:main"
+buy_on_small_spread_strategy = "ddtp.buy_on_small_spread_strategy:main"
 
 [build-system]
 requires = ["hatchling"]
