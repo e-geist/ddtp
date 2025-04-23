@@ -1,7 +1,7 @@
 from collections import defaultdict
 from decimal import Decimal
 
-from ddtp.marketdata.data import BookSnapshot, BookUpdate, OrderBookSide
+from ddtp.marketdata.data import BookSnapshot, BookDelta, OrderBookSide
 
 
 class Orderbook:
@@ -10,9 +10,9 @@ class Orderbook:
         self.asks = defaultdict(Decimal)
         self.seq = 0
 
-    def apply_event(self, event: BookSnapshot | BookUpdate):
+    def apply_event(self, event: BookSnapshot | BookDelta):
         match event:
-            case BookUpdate():
+            case BookDelta():
                 self._apply_update(event)
             case BookSnapshot():
                 self._apply_snapshot(event)
@@ -26,7 +26,7 @@ class Orderbook:
         for ask in snapshot.asks:
             self.asks[ask.price] = ask.qty
 
-    def _apply_update(self, update: BookUpdate):
+    def _apply_update(self, update: BookDelta):
         if update.seq <= self.seq:
             return  # TODO Ignore out-of-order updates
         self.seq = update.seq

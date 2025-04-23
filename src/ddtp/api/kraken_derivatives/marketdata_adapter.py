@@ -6,33 +6,42 @@ from typing import Any
 from ddtp.api.kraken_derivatives.websocket import KrakenDerivWebSocket
 from ddtp.api.kraken_derivatives.config import KrakenApiEnvVars
 
-from ddtp.marketdata.data import BookSnapshot, BookUpdate, BookSubscribed, BookBase
+from ddtp.marketdata.data import (
+    BookSnapshot,
+    BookDelta,
+    FeedType, TradeDelta, TradeSnapshot,
+)
 from ddtp.serialization.config import KafkaTopics
 from ddtp.serialization.producer import produce_message
 
 
 def parse_marketdata_event(
     event: dict[str, Any],
-) -> BookSnapshot | BookUpdate | BookSubscribed | None:
+):
+    if "event" in event:
+        return
     parsed_event = None
-    if "tickSize" in event:
-        parsed_event = BookSnapshot(**event)
+    match event["feed"]:
+        case FeedType.BOOK:
+            parsed_event = BookDelta(**event)
+        case FeedType.BOOK_SNAPSHOT:
+            parsed_event = BookSnapshot(**event)
+        case FeedType.TRADE:
+            parsed_event = TradeDelta(**event)
+        case FeedType.TRADE_SNAPSHOT:
+            parsed_event = TradeSnapshot(**event)
 
-    if "side" in event:
-        parsed_event = BookUpdate(**event)
+    if not parsed_event:
+        raise TypeError(f"Missing handling of event: {event}")
 
-    if "event" and "product_ids" in event:
-        parsed_event = BookSubscribed(**event)
-
-    if isinstance(parsed_event, BookBase):
-        produce_message(
-            topic=KafkaTopics.MARKETDATA,
-            key=parsed_event.product_id,
-            message=parsed_event,
-        )
+    produce_message(
+        topic=KafkaTopics.MARKETDATA,
+        key=parsed_event.product_id,
+        message=parsed_event,
+    )
 
 
-def start_data_receival() -> None:
+def start_data_receival(product_ids: list[str]) -> None:
     api_key = os.getenv(KrakenApiEnvVars.API_KEY)
     api_secret = os.getenv(KrakenApiEnvVars.API_SECRET)
 
@@ -43,5 +52,5 @@ def start_data_receival() -> None:
         api_key,
         api_secret,
     )
-    ws.subscribe_public("book", ["PI_XBTUSD", "PI_ETHUSD"])
-    # ws.subscribe_private("open_orders")
+    ws.subscribe_public(FeedType.BOOK, product_ids)
+    ws.subscribe_public(FeedType.TRADE, product_ids)
