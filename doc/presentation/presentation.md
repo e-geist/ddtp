@@ -607,6 +607,11 @@ class BookDelta(BookBase):
   - cancellations by exchange - can occur due to various reasons like market outages or compliance
 
 ## Kraken derivatives order execution
+::: notes
+
+- rest request response also gives first information about order, but for the feedback completely websocket was used
+
+:::
 
 - placement of orders via REST
   - different endpoints for different actions
@@ -764,4 +769,126 @@ class Fill(OrderResponse):
 
 # data storage and post-trade analysis
 
+---
+
+![](img/high_level_architecture_storage_and_analysis.png){ width=80% }
+
+---
+
+## characteristics - what is the data needed for?
+
+Differentiation mainly comes down to usage
+
+:::::::::::::: {.columns}
+::: {.column width="50%"}
+during live trading
+
+- data volume low, because only most recent state is relevant
+- fast write and read access needed
+- data changes over time
+- example: 
+  - current strategy positions
+  - current active orders
+  - global risk exposure
+:::
+
+::: {.column width="50%"}
+outside of live trading
+
+- data volume high, because 
+- fast read access is needed based on filter criteria
+- data does not change anymore
+- examples
+  - backtesting with marketdata
+  - post-trading analysis own trades 
+:::
+::::::::::::::
+
+## live trading
+
+- use of RDBMS ➡️ Postgres
+  - write most recent states as rows to database 
+  - retrieve only most recent rows e.g. by update time
+  - biggest disadvantage: one more service to operate
+- use of kafka
+  - publish most recent state regularly
+  - read most recent n messages and process to find desired state
+  - biggest disadvantage: retrieval might get finicky in a system with a lot of participants
+- TODO: add what was used for poc
+
+## outside of live trading
+
+- different types of consumers ➡️ format must be language agnostic
+- different types of data ➡️ format must be flexible
+- big volume of data ➡️ format must support compression
+
+. . .
+
+:::::::::::::: {.columns}
+::: {.column width="40%"}
+:::
+::: {.column width="20%"}
+➡️ **parquet**
+:::
+::: {.column width="40%"}
+:::
+::::::::::::::
+
+- de-facto standard for longterm storage of big data volumes
+- supported by all big analysis systems and programming languages
+
+---
+
+### implementation
+
+- retention time of kafka topics high enough (e.g. 3 days to have safety buffer)
+- scheduled run of data dumper on a regular basis - after trading day passed
+  - reads kafka topic
+  - dumps data payload parquet
+- different data dumpers for
+  - marketdata (internal format!)
+  - order actions (new order, modify, cancel)
+  - order feedback (acknowledgements, cancel)
+  - trades/fills
+
 # outlook
+
+## technical
+
+::: notes
+
+- strategies reacting too fast for markets can lead to bad trading results
+
+:::
+
+- **software tests**
+  - integration and unit tests
+  - very important as software can lose very fast a lot of money
+  - [infamous knight capital case of $440 million software error](https://www.henricodolfing.com/2019/06/project-failure-case-study-knight-capital.html)
+- **emergency mechanisms**
+  - how to handle disconnects of single components?
+  - how to handle global risk management?
+  - how to handle big market shifts?
+  - how to handle unintended big trading volumes?
+  - ➡️ often better not to trade, than to trade wrong
+- **logging and alerting**
+- **where to host?** ➡️ depends on market type and market itself
+  - finance: mostly hosted on-prem in data-centers around the world close to the exchanges
+  - crypto: mostly in clouds close to crypto exchanges
+- **fine-tuning depending on markets**
+  - timing and latency of order and strategy actions
+  - storage and retention
+
+## business
+
+- **understanding markets**
+  - order types and matching mechanisms differ ➡️ marketdata and execution engine implementations may differ
+  - types of traders and grade of professionalization differ
+  - latency requirements differ
+- **compliance**
+  - different markets have different barriers to entry
+  - filing taxes
+  - depending on market regulations paper-trail is needed: which trade was done with which version of which software?
+
+# repo
+https://github.com/e-geist/ddtp

@@ -140,15 +140,17 @@ data-background-image="img/front.png">
 <p><img data-src="img/me.jpg" style="width:75.0%" /></p>
 </div><div class="column" style="width:50%;">
 <ul>
-<li>Software and Data Engineering Freelancer
+<li class="fragment">Software and Data Engineering Freelancer
 <ul>
-<li>~5 years of experience in exchange trading</li>
-<li>other industries: Infrastructure, automotive, logistics</li>
+<li class="fragment">~5 years of experience in exchange trading</li>
+<li class="fragment">other industries: Infrastructure, automotive,
+logistics</li>
 </ul></li>
-<li>contact
+<li class="fragment">contact
 <ul>
-<li><a href="mail@eugengeist.com">mail@eugengeist.com</a></li>
-<li><a
+<li class="fragment"><a
+href="mail@eugengeist.com">mail@eugengeist.com</a></li>
+<li class="fragment"><a
 href="linkedin.com/in/eugen-geist/">linkedin.com/in/eugen-geist/</a></li>
 </ul></li>
 </ul>
@@ -159,15 +161,15 @@ href="linkedin.com/in/eugen-geist/">linkedin.com/in/eugen-geist/</a></li>
 <section id="agenda" class="title-slide slide level1">
 <h1>agenda</h1>
 <ul>
-<li>motivation</li>
-<li>fundamental trading concepts and market mechanics</li>
-<li>functional and non-functional requirements</li>
-<li>market data ingestion and processing</li>
-<li>serialization and component communication</li>
-<li>order management and execution</li>
-<li>implementation of trading strategies</li>
-<li>post-trade analysis</li>
-<li>outlook</li>
+<li class="fragment">motivation</li>
+<li class="fragment">fundamental trading concepts</li>
+<li class="fragment">functional and non-functional requirements</li>
+<li class="fragment">implementation of trading strategies</li>
+<li class="fragment">component communication</li>
+<li class="fragment">marketdata ingestion and processing</li>
+<li class="fragment">order management and execution</li>
+<li class="fragment">data storage and post-trade analysis</li>
+<li class="fragment">outlook</li>
 </ul>
 </section>
 
@@ -208,9 +210,9 @@ class="title-slide slide level1">
 class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a></p>
 </blockquote>
 <ul>
-<li>buying apples for pears</li>
-<li>selling stocks for money</li>
-<li>buying eth coin for bitcoin</li>
+<li class="fragment">buying apples for pears</li>
+<li class="fragment">selling stocks for money</li>
+<li class="fragment">buying eth coin for bitcoin</li>
 </ul>
 </section>
 <section id="exchange" class="slide level2">
@@ -221,10 +223,10 @@ business or an electronic platform.<a href="#/fn2" class="footnote-ref"
 id="fnref2" role="doc-noteref"><sup>2</sup></a></p>
 </blockquote>
 <ul>
-<li>also called market</li>
-<li>weekly markets in city center</li>
-<li>stock exchange</li>
-<li>crypto exchange</li>
+<li class="fragment">also called market</li>
+<li class="fragment">weekly markets in city center</li>
+<li class="fragment">stock exchange</li>
+<li class="fragment">crypto exchange</li>
 </ul>
 </section>
 <section id="algorithmic-trading" class="slide level2">
@@ -236,8 +238,9 @@ href="#/fn3" class="footnote-ref" id="fnref3"
 role="doc-noteref"><sup>3</sup></a></p>
 </blockquote>
 <ul>
-<li>also used for trading crypto or commodities (e.g. electricity)</li>
-<li>usually use orders and orderbooks for trading</li>
+<li class="fragment">also used for trading crypto or commodities
+(e.g. electricity)</li>
+<li class="fragment">usually use orders and orderbooks for trading</li>
 </ul>
 </section>
 <section id="orderbook" class="slide level2">
@@ -249,15 +252,16 @@ href="#/fn4" class="footnote-ref" id="fnref4"
 role="doc-noteref"><sup>4</sup></a></p>
 </blockquote>
 <ul>
-<li>order: offer to buy or sell - consists usually of
+<li class="fragment">order: offer to buy or sell - consists usually of
 <ul>
-<li>price for one unit</li>
-<li>amount</li>
-<li>identifier</li>
+<li class="fragment">price for one unit</li>
+<li class="fragment">amount</li>
+<li class="fragment">identifier</li>
 </ul></li>
-<li>orderbook: list of all orders for one specific good</li>
-<li>orderbook level: aggregated quantity of all orders for one
-price</li>
+<li class="fragment">orderbook: list of all orders for one specific
+good</li>
+<li class="fragment">orderbook level: aggregated quantity of all orders
+for one price</li>
 </ul>
 </section>
 <section class="slide level2">
@@ -267,21 +271,23 @@ price</li>
 <section id="trades-and-positions" class="slide level2">
 <h2>trades and positions</h2>
 <ul>
-<li><strong>trade</strong>: an order that was <em>executed</em> ➡️
-somebody else matched your order and you actually bought/sold a
+<li class="fragment"><strong>trade</strong>: an order that was
+<em>executed</em> ➡️ somebody else matched your order and you actually
+bought/sold a good</li>
+<li class="fragment"><strong>position</strong>: accumulation of all
+trades for one specific good ➡️ how much do I actually have of a
 good</li>
-<li><strong>position</strong>: accumulation of all trades for one
-specific good ➡️ how much do I actually have of a good</li>
 </ul>
 </section>
 <section id="summary" class="slide level2">
 <h2>summary</h2>
 <ul>
-<li>order: sell or buy offer</li>
-<li>orderbook: list of sell and buy offers for one good</li>
-<li>trade: I bought/sold a good for a price</li>
-<li>position: How much I have of a good</li>
-<li>instrument: traded good</li>
+<li class="fragment">order: sell or buy offer</li>
+<li class="fragment">orderbook: list of sell and buy offers for one
+good</li>
+<li class="fragment">trade: I bought/sold a good for a price</li>
+<li class="fragment">position: How much I have of a good</li>
+<li class="fragment">instrument: traded good</li>
 </ul>
 </section></section>
 <section>
@@ -294,57 +300,62 @@ class="title-slide slide level1">
 <h2>functional requirements</h2>
 <p>I want to</p>
 <ul>
-<li>be able to trade instruments with different algorithms on an
-exchange</li>
-<li>get insights about how I traded</li>
-<li>improve my trading systematically</li>
+<li class="fragment">be able to trade instruments with different
+algorithms on an exchange</li>
+<li class="fragment">get insights about how I traded</li>
+<li class="fragment">improve my trading systematically</li>
 </ul>
 </section>
 <section id="non-functional-requirements" class="slide level2">
 <h2>non-functional requirements</h2>
 <p>I want to</p>
 <ul>
-<li>trade
+<li class="fragment">trade
 <ul>
-<li>on different exchanges (Extensibility + Scalability)</li>
-<li>multiple instruments (Scalability)</li>
-<li>using different (Extensibility + Scalability)</li>
+<li class="fragment">on different exchanges (Extensibility +
+Scalability)</li>
+<li class="fragment">multiple instruments (Scalability)</li>
+<li class="fragment">using different (Extensibility + Scalability)</li>
 </ul></li>
-<li>have recordings about performed actions (Transparency +
-Compliance)</li>
-<li>be sufficiently fast to trade properly (Performance +
-Throughput)</li>
+<li class="fragment">have recordings about performed actions
+(Transparency + Compliance)</li>
+<li class="fragment">be sufficiently fast to trade properly (Performance
++ Throughput)</li>
 </ul>
 </section>
 <section id="technical-requirements" class="slide level2">
 <h2>technical requirements</h2>
 <p>I need for trading</p>
 <ul>
-<li>an API to receive marketdata to know what happens</li>
-<li>an API to send orders to exchange to trade</li>
-<li>an API to receive feedback about orders and trades</li>
-<li>to structure my components independently to connect them in multiple
-ways</li>
+<li class="fragment">an API to receive marketdata to know what
+happens</li>
+<li class="fragment">an API to send orders to exchange to trade</li>
+<li class="fragment">an API to receive feedback about orders and
+trades</li>
+<li class="fragment">to structure my components independently to connect
+them in multiple ways</li>
 </ul>
 </section>
 <section class="slide level2">
 
 <p>I need for having records about performed actions</p>
 <ul>
-<li>to store what I did (orders, decisions)</li>
-<li>to store what my actions triggered (trades, order
+<li class="fragment">to store what I did (orders, decisions)</li>
+<li class="fragment">to store what my actions triggered (trades, order
 cancellations)</li>
-<li>to store what happens on the market (marketdata)</li>
+<li class="fragment">to store what happens on the market
+(marketdata)</li>
 </ul>
 </section>
 <section class="slide level2">
 
 <p>I need for being sufficiently fast to</p>
 <ul>
-<li>structure my components independently to scale them</li>
-<li>pick fast technologies</li>
-<li>pick a location as close as possible to the exchanges (if
-possible)</li>
+<li class="fragment">structure my components independently to scale
+them</li>
+<li class="fragment">pick fast technologies</li>
+<li class="fragment">pick a location as close as possible to the
+exchanges (if possible)</li>
 </ul>
 </section>
 <section class="slide level2">
@@ -385,36 +396,41 @@ style="width:80.0%" /></p>
 <section id="trading-strategies-or-algorithms" class="slide level2">
 <h2>trading strategies or algorithms</h2>
 <ul>
-<li>based on a signal a decision is made to act on a market</li>
-<li>most important signals, that need to be provided
+<li class="fragment">based on a signal a decision is made to act on a
+market</li>
+<li class="fragment">most important signals, that need to be provided
 <ul>
-<li>marktdata</li>
-<li>feedback for own orders</li>
-<li>own position</li>
-<li>for derivatives: data of underlying assets (live or forecasts)</li>
+<li class="fragment">marktdata</li>
+<li class="fragment">feedback for own orders</li>
+<li class="fragment">own position</li>
+<li class="fragment">for derivatives: data of underlying assets (live or
+forecasts)</li>
 </ul></li>
-<li>needs to be able to execute wanted actions on a market ➡️ <em>order
-actions</em></li>
+<li class="fragment">needs to be able to execute wanted actions on a
+market ➡️ <em>order actions</em></li>
 </ul>
 </section>
 <section id="implementation" class="slide level2">
 <h2>implementation</h2>
 <ul>
-<li>most of the time it makes sense to have one trading strategy
-instance per traded instrument as
+<li class="fragment">most of the time it makes sense to have one trading
+strategy instance per traded instrument as
 <ul>
-<li>orderbooks are separated per instrument</li>
-<li>orders are sent per instrument</li>
+<li class="fragment">orderbooks are separated per instrument</li>
+<li class="fragment">orders are sent per instrument</li>
 </ul></li>
-<li>to make decisions, trading strategy should keep track of
+<li class="fragment">to make decisions, trading strategy should keep
+track of
 <ul>
-<li>marketdata/orderbook of traded instrument ➡️ requires marketdata
-from exchange and book-building</li>
-<li>own active orders ➡️ requires feedback for sent orders</li>
-<li>own position/exposure ➡️ requires feedback for sent orders</li>
+<li class="fragment">marketdata/orderbook of traded instrument ➡️
+requires marketdata from exchange and book-building</li>
+<li class="fragment">own active orders ➡️ requires feedback for sent
+orders</li>
+<li class="fragment">own position/exposure ➡️ requires feedback for sent
+orders</li>
 </ul></li>
-<li>to be able to act, trading strategies require need an interface to
-send order actions</li>
+<li class="fragment">to be able to act, trading strategies require need
+an interface to send order actions</li>
 </ul>
 </section>
 <section class="slide level2">
@@ -484,9 +500,8 @@ class="sourceCode python"><code class="sourceCode python"><span id="cb3-1"><a hr
 </div>
 </section></section>
 <section>
-<section id="serialization-and-component-communication"
-class="title-slide slide level1">
-<h1>serialization and component communication</h1>
+<section id="component-communication" class="title-slide slide level1">
+<h1>component communication</h1>
 
 </section>
 <section class="slide level2">
@@ -498,10 +513,11 @@ style="width:80.0%" /></p>
 <section class="slide level2">
 
 <ul>
-<li>to allow for redundancy: horizontal scaling</li>
-<li>horizontal scaling requires communication via network (otherwise
-unix sockets might have been an option)</li>
-<li>to send something via network it has to be serialized</li>
+<li class="fragment">to allow for redundancy: horizontal scaling</li>
+<li class="fragment">horizontal scaling requires communication via
+network (otherwise unix sockets might have been an option)</li>
+<li class="fragment">to send something via network it has to be
+serialized</li>
 </ul>
 </section>
 <section id="serialization" class="slide level2">
@@ -519,12 +535,12 @@ role="doc-noteref"><sup>7</sup></a></p>
 </blockquote>
 <p>possible candidates</p>
 <ul>
-<li>json</li>
-<li>protocol buffers (protobuf)</li>
-<li>flatbuffers</li>
-<li>msgpack</li>
-<li>pickle</li>
-<li>proprietary</li>
+<li class="fragment">json</li>
+<li class="fragment">protocol buffers (protobuf)</li>
+<li class="fragment">flatbuffers</li>
+<li class="fragment">msgpack</li>
+<li class="fragment">pickle</li>
+<li class="fragment">proprietary</li>
 </ul>
 </section>
 <section id="communication" class="slide level2">
@@ -539,12 +555,13 @@ role="doc-noteref"><sup>7</sup></a></p>
 </blockquote>
 <p>possible candidates</p>
 <ul>
-<li>proprietary tcp</li>
-<li>proprietary udp (also multicast)</li>
-<li>REST (HTTP)</li>
-<li>gRPC (requires protobuf as serialization)</li>
-<li>event streaming or message broker (kafka, rabbitmq, …)</li>
-<li>database (postgres, mysql, …)</li>
+<li class="fragment">proprietary tcp</li>
+<li class="fragment">proprietary udp (also multicast)</li>
+<li class="fragment">REST (HTTP)</li>
+<li class="fragment">gRPC (requires protobuf as serialization)</li>
+<li class="fragment">event streaming or message broker (kafka, rabbitmq,
+…)</li>
+<li class="fragment">database (postgres, mysql, …)</li>
 </ul>
 </section>
 <section id="messagepack-via-kafka" class="slide level2">
@@ -558,28 +575,30 @@ role="doc-noteref"><sup>7</sup></a></p>
 </ul>
 </aside>
 <ul>
-<li>fast</li>
-<li>established
+<li class="fragment">fast</li>
+<li class="fragment">established
 <ul>
-<li>support in all (big) programming languages exist ➡️ consumer and
-producer are language independent (used kafka-python<a href="#/fn8"
-class="footnote-ref" id="fnref8"
+<li class="fragment">support in all (big) programming languages exist ➡️
+consumer and producer are language independent (used kafka-python<a
+href="#/fn8" class="footnote-ref" id="fnref8"
 role="doc-noteref"><sup>8</sup></a>)</li>
-<li>can be used as managed service in cloud</li>
-<li>many people with experience ➡️ easier to hire</li>
+<li class="fragment">can be used as managed service in cloud</li>
+<li class="fragment">many people with experience ➡️ easier to hire</li>
 </ul></li>
-<li>resilient</li>
-<li>messages can be replayed</li>
-<li>scalable: n producers to m consumers
+<li class="fragment">resilient</li>
+<li class="fragment">messages can be replayed</li>
+<li class="fragment">scalable: n producers to m consumers
 <ul>
-<li>allows storing messages with separate consumer</li>
-<li>allows multiple producers on same channel (topic) for failovers</li>
+<li class="fragment">allows storing messages with separate consumer</li>
+<li class="fragment">allows multiple producers on same channel (topic)
+for failovers</li>
 </ul></li>
-<li>does not require specific serialization</li>
-<li>disadvantages:
+<li class="fragment">does not require specific serialization</li>
+<li class="fragment">disadvantages:
 <ul>
-<li>no built-in mechanism to check whether consumers are gone</li>
-<li>has to be operated as a separate service</li>
+<li class="fragment">no built-in mechanism to check whether consumers
+are gone</li>
+<li class="fragment">has to be operated as a separate service</li>
 </ul></li>
 </ul>
 </section>
@@ -593,15 +612,17 @@ role="doc-noteref"><sup>8</sup></a>)</li>
 </ul>
 </aside>
 <ul>
-<li>allows conversion of arbitrary objects to bytes and back</li>
-<li>schemalass (e.g. in contrast to protobuf)</li>
-<li>fast</li>
-<li>established
+<li class="fragment">allows conversion of arbitrary objects to bytes and
+back</li>
+<li class="fragment">schemalass (e.g. in contrast to protobuf)</li>
+<li class="fragment">fast</li>
+<li class="fragment">established
 <ul>
-<li>support in all (big) programming languages exist (used ormsgpack<a
-href="#/fn9" class="footnote-ref" id="fnref9"
+<li class="fragment">support in all (big) programming languages exist
+(used ormsgpack<a href="#/fn9" class="footnote-ref" id="fnref9"
 role="doc-noteref"><sup>9</sup></a> for python)</li>
-<li>backed and used by big products like redis, fluentd, pinterest</li>
+<li class="fragment">backed and used by big products like redis,
+fluentd, pinterest</li>
 </ul></li>
 </ul>
 </section>
@@ -628,24 +649,25 @@ style="width:80.0%" /></p>
 <section id="general" class="slide level2">
 <h2>general</h2>
 <ul>
-<li>also called public data</li>
-<li>one orderbook per traded instrument</li>
-<li>essential for implementing trading strategies as current prices and
-quantities are provided</li>
-<li>mostly available as unidirectional data streams (e.g. via
-websockets, TCP or UDP)</li>
-<li>different types of data
+<li class="fragment">also called public data</li>
+<li class="fragment">one orderbook per traded instrument</li>
+<li class="fragment">essential for implementing trading strategies as
+current prices and quantities are provided</li>
+<li class="fragment">mostly available as unidirectional data streams
+(e.g. via websockets, TCP or UDP)</li>
+<li class="fragment">different types of data
 <ul>
-<li><strong>level 1</strong> (or top of book) data: currently best buy
-(highest) and sell (lowest) offer</li>
-<li><strong>level 2</strong> data: excerpt from orderbook with top n
-levels</li>
-<li><strong>level 3</strong> (or tick-by-tick or order-by-order) data:
-each order and its state (placed, changed, removed)</li>
-<li>usually also information about trades</li>
+<li class="fragment"><strong>level 1</strong> (or top of book) data:
+currently best buy (highest) and sell (lowest) offer</li>
+<li class="fragment"><strong>level 2</strong> data: excerpt from
+orderbook with top n levels</li>
+<li class="fragment"><strong>level 3</strong> (or tick-by-tick or
+order-by-order) data: each order and its state (placed, changed,
+removed)</li>
+<li class="fragment">usually also information about trades</li>
 </ul></li>
-<li>level 3 data contains the most detail, but also has highest volume
-and is usually most expensive</li>
+<li class="fragment">level 3 data contains the most detail, but also has
+highest volume and is usually most expensive</li>
 </ul>
 </section>
 <section class="slide level2">
@@ -655,45 +677,53 @@ and is usually most expensive</li>
 <section id="marketdata-ingestion" class="slide level2">
 <h2>marketdata ingestion</h2>
 <ul>
-<li>trading strategies should be use-able on different exchanges</li>
-<li>different exchanges have different marketdata protocols</li>
-<li>decoupling of trading system from exchanges by normalizing
-marketdata to internal format via adapter pattern<a href="#/fn11"
-class="footnote-ref" id="fnref11"
+<li class="fragment">trading strategies should be use-able on different
+exchanges</li>
+<li class="fragment">different exchanges have different marketdata
+protocols</li>
+<li class="fragment">decoupling of trading system from exchanges by
+normalizing marketdata to internal format via adapter pattern<a
+href="#/fn11" class="footnote-ref" id="fnref11"
 role="doc-noteref"><sup>11</sup></a></li>
 </ul>
 </section>
 <section id="marketdata-adapter" class="slide level2">
 <h2>➡️ marketdata adapter</h2>
 <ul>
-<li>per exchange
+<li class="fragment">per exchange
 <ul>
-<li>receives marketdata from exchanges</li>
-<li>normalizes marketdata to internal representation</li>
+<li class="fragment">receives marketdata from exchanges</li>
+<li class="fragment">normalizes marketdata to internal
+representation</li>
 </ul></li>
-<li>forwards normalized marketdata to strategies</li>
+<li class="fragment">forwards normalized marketdata to strategies</li>
 </ul>
 </section>
 <section id="kraken-derivatives-marketdata-adapter"
 class="slide level2">
 <h2>Kraken derivatives marketdata adapter</h2>
 <ul>
-<li>subscribes to marketdata for different instruments
+<li class="fragment">subscribes to marketdata for different instruments
 <ul>
-<li>via websocket</li>
-<li>exchange sends JSON (use orjson<a href="#/fn12" class="footnote-ref"
-id="fnref12" role="doc-noteref"><sup>12</sup></a> for fast parsing)</li>
+<li class="fragment">via websocket</li>
+<li class="fragment">exchange sends JSON (use orjson<a href="#/fn12"
+class="footnote-ref" id="fnref12" role="doc-noteref"><sup>12</sup></a>
+for fast parsing)</li>
 </ul></li>
-<li>L2 marketdata ➡️ orderbook levels
+<li class="fragment">L2 marketdata ➡️ orderbook levels
 <ul>
-<li>on connect a <em>snapshot</em> is received: the whole orderbook</li>
-<li>consecutive messages are <em>deltas</em>: what changes to levels
-ocurred compared to previous message</li>
+<li class="fragment">on connect a <em>snapshot</em> is received: the
+whole orderbook</li>
+<li class="fragment">consecutive messages are <em>deltas</em>: what
+changes to levels ocurred compared to previous message</li>
 </ul></li>
-<li>received marketdata is processed and sent to strategies
+<li class="fragment">received marketdata is processed and sent to
+strategies
 <ul>
-<li>not only transformation, but also keeps track of orderbooks</li>
-<li>sends each N minutes a snapshot to the strategies</li>
+<li class="fragment">not only transformation, but also keeps track of
+orderbooks</li>
+<li class="fragment">sends each N minutes a snapshot to the
+strategies</li>
 </ul></li>
 </ul>
 </section>
@@ -823,87 +853,99 @@ style="width:80.0%" /></p>
 <section id="sending-orders" class="slide level2">
 <h2>sending orders</h2>
 <ul>
-<li>trading strategies should be able to send orders to different
-exchanges</li>
-<li>different exchanges have different protocols for sending orders</li>
-<li>decoupling of trading system from exchanges by normalizing order
-sending via adapter pattern<a href="#/fn13" class="footnote-ref"
-id="fnref13" role="doc-noteref"><sup>13</sup></a></li>
+<li class="fragment">trading strategies should be able to send orders to
+different exchanges</li>
+<li class="fragment">different exchanges have different protocols for
+sending orders</li>
+<li class="fragment">decoupling of trading system from exchanges by
+normalizing order sending via adapter pattern<a href="#/fn13"
+class="footnote-ref" id="fnref13"
+role="doc-noteref"><sup>13</sup></a></li>
 </ul>
 </section>
 <section id="general-order-execution" class="slide level2">
 <h2>general order execution</h2>
 <ul>
-<li>also sometimes called private data</li>
-<li>bidirectional - either send/receive via same or separate channels
+<li class="fragment">also sometimes called private data</li>
+<li class="fragment">bidirectional - either send/receive via same or
+separate channels
 <ul>
-<li>proprietary TCP</li>
-<li>input via HTTP/REST, feedback via websocket</li>
+<li class="fragment">proprietary TCP</li>
+<li class="fragment">input via HTTP/REST, feedback via websocket</li>
 </ul></li>
 </ul>
 </section>
 <section id="order-execution-engine" class="slide level2">
 <h2>➡️ order execution engine</h2>
 <ul>
-<li>similar to marketdata adapter, but for outgoing orders (adapter
-pattern used)</li>
-<li>receives normalized order action from strategy</li>
-<li>per exchange
+<li class="fragment">similar to marketdata adapter, but for outgoing
+orders (adapter pattern used)</li>
+<li class="fragment">receives normalized order action from strategy</li>
+<li class="fragment">per exchange
 <ul>
-<li>converts normalized order action to exchange format</li>
-<li>sends order action to exchange</li>
-<li>receives order feedback from exchange</li>
-<li>normalizes order feedback from exchange</li>
+<li class="fragment">converts normalized order action to exchange
+format</li>
+<li class="fragment">sends order action to exchange</li>
+<li class="fragment">receives order feedback from exchange</li>
+<li class="fragment">normalizes order feedback from exchange</li>
 </ul></li>
-<li>sends order action feedback to strategy</li>
+<li class="fragment">sends order action feedback to strategy</li>
 </ul>
 </section>
 <section id="order-actions" class="slide level2">
 <h2>order actions</h2>
 <ul>
-<li>depending on order type and market, order actions and feedback can
-vary</li>
-<li>common order actions for orderbook trading
+<li class="fragment">depending on order type and market, order actions
+and feedback can vary</li>
+<li class="fragment">common order actions for orderbook trading
 <ul>
-<li>place new order</li>
-<li>modify order price or quantity of active order</li>
-<li>cancel active order</li>
+<li class="fragment">place new order</li>
+<li class="fragment">modify order price or quantity of active order</li>
+<li class="fragment">cancel active order</li>
 </ul></li>
-<li>common feedback for orderbook trading
+<li class="fragment">common feedback for orderbook trading
 <ul>
-<li>action confirmations
+<li class="fragment">action confirmations
 <ul>
-<li>new</li>
-<li>modify</li>
-<li>cancelled</li>
+<li class="fragment">new</li>
+<li class="fragment">modify</li>
+<li class="fragment">cancelled</li>
 </ul></li>
-<li>trades, also called fills - order was ful<em>filled</em></li>
-<li>cancellations by exchange - can occur due to various reasons like
-market outages or compliance</li>
+<li class="fragment">trades, also called fills - order was
+ful<em>filled</em></li>
+<li class="fragment">cancellations by exchange - can occur due to
+various reasons like market outages or compliance</li>
 </ul></li>
 </ul>
 </section>
 <section id="kraken-derivatives-order-execution" class="slide level2">
 <h2>Kraken derivatives order execution</h2>
+<aside class="notes">
 <ul>
-<li>placement of orders via REST
+<li>rest request response also gives first information about order, but
+for the feedback completely websocket was used</li>
+</ul>
+</aside>
 <ul>
-<li>different endpoints for different actions</li>
-<li>expects JSON as input</li>
+<li class="fragment">placement of orders via REST
+<ul>
+<li class="fragment">different endpoints for different actions</li>
+<li class="fragment">expects JSON as input</li>
 </ul></li>
-<li>feedback via websocket or REST polling ➡️ for proof of concept
-websocket was selected
+<li class="fragment">feedback via websocket or REST polling ➡️ for proof
+of concept websocket was selected
 <ul>
-<li>same websocket endpoint as for marketdata adapter</li>
-<li>on connect a <em>snapshot</em> of the subscribed data is
-received</li>
-<li>consecutive messages are <em>deltas</em>: what changes to data
-ocurred compared to previous message</li>
+<li class="fragment">same websocket endpoint as for marketdata
+adapter</li>
+<li class="fragment">on connect a <em>snapshot</em> of the subscribed
+data is received</li>
+<li class="fragment">consecutive messages are <em>deltas</em>: what
+changes to data ocurred compared to previous message</li>
 </ul></li>
-<li>order actions received from strategies are converted and forwarded
-to exchange</li>
-<li>feedback received from exchange is normalized and forwarded to
-strategies</li>
+<li class="fragment">order actions received from strategies are
+converted and forwarded to exchange</li>
+<li class="fragment">feedback received from exchange is normalized and
+forwarded to strategies</li>
 </ul>
 </section>
 <section class="slide level2">
@@ -1022,37 +1064,224 @@ class="sourceCode python"><code class="sourceCode python"><span id="cb12-1"><a h
 <section id="order-handling-caveats" class="slide level2">
 <h2>order handling caveats</h2>
 <ul>
-<li>order actions can fail for various reasons
+<li class="fragment">order actions can fail for various reasons
 <ul>
-<li>cancel for already filled order</li>
-<li>modify for already filled order</li>
-<li>modify for already cancelled order (by exchange)</li>
+<li class="fragment">cancel for already filled order</li>
+<li class="fragment">modify for already filled order</li>
+<li class="fragment">modify for already cancelled order (by
+exchange)</li>
 </ul></li>
-<li>due to distributed nature and latency to exchange, strategies might
-react too late ➡️ low latency helps up to a certain point</li>
-<li>most exchanges have rate limits
+<li class="fragment">due to distributed nature and latency to exchange,
+strategies might react too late ➡️ low latency helps up to a certain
+point</li>
+<li class="fragment">most exchanges have rate limits
 <ul>
-<li>limit possible actions per time period</li>
-<li>punish you if you try too often to violate them</li>
-<li>➡️ paying more for higher rate limits or multiple accounts might
-help (if allowed)</li>
+<li class="fragment">limit possible actions per time period</li>
+<li class="fragment">punish you if you try too often to violate
+them</li>
+<li class="fragment">➡️ paying more for higher rate limits or multiple
+accounts might help (if allowed)</li>
 </ul></li>
-<li>order execution engine can also keep track of orders to
+<li class="fragment">order execution engine can also keep track of
+orders to
 <ul>
-<li>act proactively (e.g. don’t send cancel for filled order)</li>
-<li>keep track of rate limits and allow cancels in emergencies</li>
+<li class="fragment">act proactively (e.g. don’t send cancel for filled
+order)</li>
+<li class="fragment">keep track of rate limits and allow cancels in
+emergencies</li>
 </ul></li>
 </ul>
 </section></section>
+<section>
 <section id="data-storage-and-post-trade-analysis"
 class="title-slide slide level1">
 <h1>data storage and post-trade analysis</h1>
 
 </section>
+<section class="slide level2">
 
+<p><img data-src="img/high_level_architecture_storage_and_analysis.png"
+style="width:80.0%" /></p>
+</section>
+<section id="characteristics---what-is-the-data-needed-for"
+class="slide level2">
+<h2>characteristics - what is the data needed for?</h2>
+<p>Differentiation mainly comes down to usage</p>
+<div class="columns">
+<div class="column" style="width:50%;">
+<p>during live trading</p>
+<ul>
+<li class="fragment">data volume low, because only most recent state is
+relevant</li>
+<li class="fragment">fast write and read access needed</li>
+<li class="fragment">data changes over time</li>
+<li class="fragment">example:
+<ul>
+<li class="fragment">current strategy positions</li>
+<li class="fragment">current active orders</li>
+</ul></li>
+</ul>
+</div><div class="column" style="width:50%;">
+<p>outside of live trading</p>
+<ul>
+<li class="fragment">data volume high, because</li>
+<li class="fragment">fast read access is needed based on filter
+criteria</li>
+<li class="fragment">data does not change anymore</li>
+<li class="fragment">examples
+<ul>
+<li class="fragment">backtesting with marketdata</li>
+<li class="fragment">post-trading analysis own trades</li>
+</ul></li>
+</ul>
+</div>
+</div>
+</section>
+<section id="live-trading" class="slide level2">
+<h2>live trading</h2>
+<ul>
+<li class="fragment">use of RDBMS ➡️ Postgres
+<ul>
+<li class="fragment">write most recent states as rows to database</li>
+<li class="fragment">retrieve only most recent rows e.g. by update
+time</li>
+<li class="fragment">biggest disadvantage: one more service to
+operate</li>
+</ul></li>
+<li class="fragment">use of kafka
+<ul>
+<li class="fragment">publish most recent state regularly</li>
+<li class="fragment">read most recent n messages and process to find
+desired state</li>
+<li class="fragment">biggest disadvantage: retrieval might get finicky
+in a system with a lot of participants</li>
+</ul></li>
+<li class="fragment">TODO: add what was used for poc</li>
+</ul>
+</section>
+<section id="outside-of-live-trading" class="slide level2">
+<h2>outside of live trading</h2>
+<ul>
+<li class="fragment">different types of consumers ➡️ format must be
+language agnostic</li>
+<li class="fragment">different types of data ➡️ format must be
+flexible</li>
+<li class="fragment">big volume of data ➡️ format must support
+compression</li>
+</ul>
+<div class="fragment">
+<div class="columns">
+<div class="column" style="width:40%;">
+
+</div><div class="column" style="width:20%;">
+<p>➡️ <strong>parquet</strong></p>
+</div><div class="column" style="width:40%;">
+
+</div>
+</div>
+<ul>
+<li class="fragment">de-facto standard for longterm storage of big data
+volumes</li>
+<li class="fragment">supported by all big analysis systems and
+programming languages</li>
+</ul>
+</div>
+</section>
+<section class="slide level2">
+
+<h3 id="implementation-1">implementation</h3>
+<ul>
+<li class="fragment">retention time of kafka topics high enough (e.g. 3
+days to have safety buffer)</li>
+<li class="fragment">scheduled run of data dumper on a regular basis -
+after trading day passed
+<ul>
+<li class="fragment">reads kafka topic</li>
+<li class="fragment">dumps data payload parquet</li>
+</ul></li>
+<li class="fragment">different data dumpers for
+<ul>
+<li class="fragment">marketdata (internal format!)</li>
+<li class="fragment">order actions (new order, modify, cancel)</li>
+<li class="fragment">order feedback (acknowledgements, cancel)</li>
+<li class="fragment">trades/fills</li>
+</ul></li>
+</ul>
+</section></section>
+<section>
 <section id="outlook" class="title-slide slide level1">
 <h1>outlook</h1>
 
+</section>
+<section id="technical" class="slide level2">
+<h2>technical</h2>
+<aside class="notes">
+<ul>
+<li>strategies reacting too fast for markets can lead to bad trading
+results</li>
+</ul>
+</aside>
+<ul>
+<li class="fragment"><strong>software tests</strong>
+<ul>
+<li class="fragment">integration and unit tests</li>
+<li class="fragment">very important as software can lose very fast a lot
+of money</li>
+<li class="fragment"><a
+href="https://www.henricodolfing.com/2019/06/project-failure-case-study-knight-capital.html">infamous
+knight capital case of $440 million software error</a></li>
+</ul></li>
+<li class="fragment"><strong>emergency mechanisms</strong>
+<ul>
+<li class="fragment">how to handle disconnects of single
+components?</li>
+<li class="fragment">how to handle global risk management?</li>
+<li class="fragment">how to handle big market shifts?</li>
+<li class="fragment">how to handle unintended big trading volumes?</li>
+<li class="fragment">➡️ often better not to trade, than to trade
+wrong</li>
+</ul></li>
+<li class="fragment"><strong>logging and alerting</strong></li>
+<li class="fragment"><strong>where to host?</strong> ➡️ depends on
+market type and market itself
+<ul>
+<li class="fragment">finance: mostly hosted on-prem in data-centers
+around the world close to the exchanges</li>
+<li class="fragment">crypto: mostly in clouds close to crypto
+exchanges</li>
+</ul></li>
+<li class="fragment"><strong>fine-tuning depending on markets</strong>
+<ul>
+<li class="fragment">timing and latency of order and strategy
+actions</li>
+<li class="fragment">storage and retention</li>
+</ul></li>
+</ul>
+</section>
+<section id="business" class="slide level2">
+<h2>business</h2>
+<ul>
+<li class="fragment"><strong>understanding markets</strong>
+<ul>
+<li class="fragment">order types and matching mechanisms differ ➡️
+marketdata and execution engine implementations may differ</li>
+<li class="fragment">types of traders and grade of professionalization
+differ</li>
+<li class="fragment">latency requirements differ</li>
+</ul></li>
+<li class="fragment"><strong>compliance</strong>
+<ul>
+<li class="fragment">different markets have different barriers to
+entry</li>
+<li class="fragment">filing taxes</li>
+<li class="fragment">depending on market regulations paper-trail is
+needed: which trade was done with which version of which software?</li>
+</ul></li>
+</ul>
+</section></section>
+<section id="repo" class="title-slide slide level1">
+<h1>repo</h1>
+<p>https://github.com/e-geist/ddtp</p>
 </section>
 
 <section id="footnotes" class="footnotes footnotes-end-of-document"
