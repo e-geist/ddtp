@@ -85,7 +85,6 @@ title-slide-attributes:
 - order: offer to buy or sell - consists usually of
     - price for one unit
     - amount
-    - identifier
 - orderbook: list of all orders for one specific good
 - orderbook level: aggregated quantity of all orders for one price
 
@@ -102,7 +101,7 @@ title-slide-attributes:
 - order: sell or buy offer
 - orderbook: list of sell and buy offers for one good
 - trade: I bought/sold a good for a price
-- position: How much I have of a good
+- position: how much I have of a good
 - instrument: traded good
 
 # functional and non-functional requirements
@@ -118,9 +117,9 @@ I want to
 I want to
 
 - trade 
-  - on different exchanges (Extensibility + Scalability)
-  - multiple instruments (Scalability)
-  - using different (Extensibility + Scalability)
+  - on different exchanges (extensibility + scalability)
+  - multiple instruments (scalability)
+  - using different approaches/algorithms (Extensibility + scalability)
 - have recordings about performed actions (Transparency + Compliance)
 - be sufficiently fast to trade properly (Performance + Throughput)
 
