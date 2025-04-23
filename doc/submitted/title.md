@@ -1,0 +1,1 @@
+From Algorithm to Action: Building a DIY Distributed Trading Platform with Open Source
