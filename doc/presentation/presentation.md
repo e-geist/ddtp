@@ -1,11 +1,10 @@
 ---
-title: 
-title-slide-attributes:
-    data-background-image: "img/front.png"
-    data-background-size: contain
+title: "From Algorithm to Action: Building a DIY Distributed Trading Platform with Open Source"
+date: 2024-04-24
+author: Eugen Geist
 ---
 
-## {background-image="img/front.png"}
+# {background-image="img/front.png" background-size=95%}
 
 # about me
 :::::::::::::: {.columns}
