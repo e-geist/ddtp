@@ -2,12 +2,13 @@ from collections import defaultdict
 from typing import List, Optional
 from pydantic import BaseModel
 from decimal import Decimal
-from enum import Enum, StrEnum
+from enum import StrEnum
 
 
 class FeedType(StrEnum):
     BOOK_SNAPSHOT = "book_snapshot"
     BOOK = "book"
+
 
 class OrderBookSide(StrEnum):
     BUY = "buy"
@@ -44,6 +45,7 @@ class BookUpdate(BookBase):
     side: OrderBookSide
     price: Decimal
     qty: Decimal
+
 
 class Orderbook:
     def __init__(self):
