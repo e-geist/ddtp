@@ -24,7 +24,7 @@ is implemented and supported.
 * Get API key and secret for Kraken futures
   * sign up at Kraken futures - e.g. at the [demo environment](https://demo-futures.kraken.com/futures)
   * [create and retrieve API key + secret](https://support.kraken.com/hc/en-us/articles/360022839451-How-to-create-an-API-key-for-Kraken-Futures)
-* create .env file based on (.env_template)[./.env_template] and fill details
+* create .env file based on [.env_template](./.env_template) and fill details
   * base urls depending on the environment you use ([see here](https://support.kraken.com/hc/en-us/articles/360024809011-API-Testing-Environment) for details)
   * API key and secret from previous step
   * URL of Kafka broker - if you're using the provided container, keep `localhost:9092`
