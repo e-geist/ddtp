@@ -10,7 +10,7 @@ title-slide-attributes:
 # about me
 :::::::::::::: {.columns}
 ::: {.column width="50%"}
-![](me.jpg)
+![](me.jpg){width=75%}
 :::
 ::: {.column width="50%"}
 - Software and Data Engineering Freelancer
@@ -28,6 +28,7 @@ title-slide-attributes:
 - fundamental trading concepts and market mechanics
 - functional and non-functional requirements
 - market data ingestion and processing
+- serialization and component communication
 - order management and execution
 - implementation of trading strategies
 - post-trade analysis
@@ -44,6 +45,8 @@ title-slide-attributes:
 ## interesting exercise with different technical challenges
 
 ## job opportunities
+
+## self-made is always better ( ;) )
 
 # fundamental trading concepts
 
@@ -83,8 +86,11 @@ title-slide-attributes:
     - price for one unit
     - amount
     - identifier
+- orderbook: list of all orders for one specific good
+- orderbook level: aggregated quantity of all orders for one price
 
 ---
+
 ![](orderbook_btc_usd.jpg)
 
 ## trades and positions
@@ -117,7 +123,106 @@ I want to
 - have recordings about performed actions (Transparency + Compliance)
 - be sufficiently fast to trade properly (Performance + Throughput)
 
-# market data ingestion and processing
+## technical requirements
+I need for trading
+
+- an API to receive marketdata to know what happens
+- an API to send orders to exchange to trade
+- an API to receive feedback about orders and trades
+- to structure my components independently to connect them in multiple ways
+
+---
+
+I need for having records about performed actions
+
+- to store what I did (orders, decisions)
+- to store what my actions triggered (trades, order cancellations)
+- to store what happens on the market (marketdata)
+
+---
+
+I need for being sufficiently fast
+
+- to structure my components independently to scale them
+- pick fast technolgies
+- pick a location as close as possible to the exchanges (if possible)
+
+---
+
+![](high_level_architecture.drawio.png){ width=80% }
+
+# disclaimer
+
+this is a proof of concept. 
+
+it shall demonstrate the typical architecture and components of a trading system.
+
+in real world scenarios, with a bigger team and more resources you might use other approaches, especially faster technology.
+
+---
+
+due to low-barrier access, a crypto exchange - Kraken futures[^5] - was used for the proof of concept.
+
+most exchanges have a simulation environment, that can be used for testing - also Kraken futures[^6].
+
+[^5]: _[Kraken futures, accessed 2025-04-12, 18:15](https://www.kraken.com/features/futures)_
+[^6]: _[Kraken futures simulation environment, accessed 2025-04-12, 18:20](https://demo-futures.kraken.com/futures)_
+
+# marketdata ingestion and processing
+
+---
+
+![](high_level_architecture_marketdata.png){ width=80% }
+
+---
+
+## general
+
+- also called public data
+- one orderbook per traded good
+- essential for implementing trading strategies as current prices and quantities are provided
+- mostly available as data streams (e.g. via websockets, TCP or UDP)
+- different types of data
+  - **level 1** (or top of book) data: currently best buy (highest) and sell (lowest) offer
+  - **level 2** data: excerpt from orderbook with top n levels
+  - **level 3** (or tick-by-tick or order-by-order) data: each order and its state (placed, changed, removed)
+  - usually also information about trades
+- level 3 data contains the most detail, but also has highest volume and is usually most expensive
+
+---
+
+![](orderbook_btc_usd.jpg)
+
+## marketdata ingestion
+
+- trading strategies should be use-able on different exchanges
+- different exchanges have different marketdata protocols
+- decoupling of trading system from exchanges by normalizing marketdata to internal format via adapter pattern[^7]
+
+[^7]: _[Adapter design pattern, accessed 2025-04-12, 19:40](https://refactoring.guru/design-patterns/adapter)_
+
+---
+
+## ➡️ marketdata adapter
+
+- receives marketdata from exchanges 
+- normalizes marketdata to internal representation
+- forwards normalized marketdata to strategies
+
+
+## Kraken derivatives marketdata adapter
+
+- subscribes to marketdata for different instruments
+  - via websocket
+  - exchange sends JSON
+- L2 marketdata ➡️ orderbook levels
+  - on connect a _snapshot_ is received: the whole orderbook 
+  - consecutive messages are _deltas_: what changes to levels ocurred compared to previous message
+- received marketdata is processed and sent to strategies
+  - not only transformation, but also keeps track of orderbooks
+  - sends each N minutes a snapshot to the strategies
+
+# serialization and component communication
 
 # order management and execution
 
