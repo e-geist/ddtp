@@ -20,7 +20,7 @@ from ddtp.api.kraken_derivatives.data import (
     WS_MESSAGES_EVENT_FIELD,
 )
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("kraken_deriv_marketdata_adapter")
 
 
 def _get_marketdata_parser(queue: Queue) -> Callable[[dict[str, Any]], None]:

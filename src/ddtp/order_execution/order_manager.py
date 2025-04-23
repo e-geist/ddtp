@@ -8,7 +8,7 @@ from ddtp.order_execution.data import (
     CancelOrder,
     ModifyOrder,
     OrderCancelUpdate,
-    OrderUpdate, UNKNOWN_SENDER_ID,
+    OrderUpdate, UNKNOWN_SENDER_ID, Fill, OrderStateChangeReason,
 )
 
 logger = logging.getLogger("order_manager")
@@ -36,7 +36,7 @@ class OrderManager:
 
     def process_update(
         self,
-        update: NewOrder | CancelOrder | ModifyOrder | OrderCancelUpdate | OrderUpdate,
+        update: NewOrder | CancelOrder | ModifyOrder | OrderCancelUpdate | OrderUpdate | Fill,
     ):
         self.set_sender_id_if_needed(update)
         match update:
@@ -60,13 +60,22 @@ class OrderManager:
                     state=OrderState.CANCELLED,
                 )
             case OrderUpdate():
+                if update.state_change_reason in [OrderStateChangeReason.PARTIAL_FILL, OrderStateChangeReason.FILL]:
+                    return # handled via fill message
                 self.update_active_order(
                     order_id=update.order_id,
                     client_order_id=update.client_order_id,
                     state=OrderState.ACTIVE,
                     size=update.size,
-                    filled_size=update.filled,
+                    total_filled_size=update.filled,
                     price=update.price,
+                )
+            case Fill():
+                self.update_active_order(
+                    order_id=update.order_id,
+                    client_order_id=update.client_order_id,
+                    state=(OrderState.FILLED if update.remaining_size == Decimal("0" ) else OrderState.ACTIVE),
+                    fill_to_add=update.size,
                 )
 
     def process_updates(
@@ -74,8 +83,7 @@ class OrderManager:
         updates: NewOrder
         | CancelOrder
         | ModifyOrder
-        | OrderCancelUpdate
-        | OrderUpdate
+        | list [Fill]
         | list[OrderUpdate]
         | list[OrderCancelUpdate],
     ):
@@ -123,9 +131,10 @@ class OrderManager:
         order_id: str | None = None,
         client_order_id: str | None = None,
         state: OrderState | None = None,
-        filled_size: Decimal | None = None,
+        total_filled_size: Decimal | None = None,
         size: Decimal | None = None,
         price: Decimal | None = None,
+        fill_to_add: Decimal | None = None,
     ):
         if client_order_id:
             order_id_to_use = client_order_id
@@ -137,7 +146,6 @@ class OrderManager:
         if not order_id_to_use:
             # Order is unknown, we don't handle it.
             logger.warning(f"order with order_id:{order_id}/client_order_id:{client_order_id} is unknown, will not be modified")
-            raise Exception()
             return
 
         order = self.active_orders.get(order_id_to_use)
@@ -145,14 +153,15 @@ class OrderManager:
             logger.warning(
                 f"order with order_id:{order_id}/client_order_id:{client_order_id} is not active and cannot be modified"
             )
-            raise Exception()
             return
 
         if state:
             order.state = state
 
-        if filled_size:
-            order.filled_size = filled_size
+        if total_filled_size:
+            order.filled_size = total_filled_size
+        elif fill_to_add:
+            order.filled_size += fill_to_add
 
         if size:
             order.size = size

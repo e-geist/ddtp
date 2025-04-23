@@ -43,7 +43,7 @@ def process_orderbook_event(event: BookSnapshot | BookDelta):
             side=OrderbookSide.BUY,
             order_type=OrderType.LMT,
             size=Decimal("1"),
-            limit_price=best_ask[0] - Decimal("500"),
+            limit_price=best_ask[0],
         )
         send_cancel_order_to_execution_engine(
             sender_identifier=SENDER_ID,
