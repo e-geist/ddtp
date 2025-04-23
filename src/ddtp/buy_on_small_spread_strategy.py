@@ -90,10 +90,10 @@ def process_orderbook_event(event: BookSnapshot | BookDelta):
 
     if position < Decimal("10"):
         side = OrderbookSide.BUY
-        price = best_bid_price - Decimal("500")
+        price = best_bid_price - 100
     else:
         side = OrderbookSide.SELL
-        price = best_ask_price + Decimal("500")
+        price = best_ask_price +  100
 
     global latest_client_order_id
     existing_order = order_manager.get_active_order(

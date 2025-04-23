@@ -29,16 +29,13 @@ order_manager = OrderManager()
 
 def get_on_order_action(
     order_manager_queue: mp.Queue,
-    process_action: Callable[[NewOrder | CancelOrder | ModifyOrder], None],
 ):
     def on_order_action(key: str, message: dict[str, Any], timestamp: int):
         parsed_order_action: NewOrder | CancelOrder | ModifyOrder = (
             order_action_from_dict(message)
         )
-        logging.info(f"processing order action: {parsed_order_action}")
         order_manager_queue.put(parsed_order_action)
-        process_action(parsed_order_action)
-
+        logging.info(f"processing order action: {parsed_order_action}")
 
     return on_order_action
 
@@ -80,7 +77,7 @@ def main():
         target=consume_kafka_messages,
         kwargs={
             "topic": KafkaTopics.ORDER_ENTRY,
-            "callback": get_on_order_action(order_manager_queue, send_order_action),
+            "callback": get_on_order_action(order_manager_queue),
             "group_id": IDENTIFIER,
             "client_id": IDENTIFIER,
         },
@@ -91,6 +88,8 @@ def main():
         event = order_manager_queue.get()
         order_manager.process_updates(event)
         match event:
+            case NewOrder() | CancelOrder() | ModifyOrder():
+                send_order_action(event)
             case list():
                 send_message_queue.put(event)
 
