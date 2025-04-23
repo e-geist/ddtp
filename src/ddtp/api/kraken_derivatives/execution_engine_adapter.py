@@ -111,7 +111,7 @@ def parse_open_order(event: OpenOrderDelta) -> OrderUpdate | OrderCancelUpdate:
             product_id=event_order.instrument,
             time=event_order.time,
             last_update_time=event_order.last_update_time,
-            client_order_id=event_order.cli_ord_id if event_order.cli_ord_id else None,
+            client_order_id=event_order.cli_ord_id,
             order_id=event_order.order_id,
             order_type=event_order.type.to_internal(),
             side=event_order.direction.to_internal(),

@@ -3,6 +3,7 @@
 import datetime as dt
 from decimal import Decimal
 from enum import StrEnum
+from typing import Any
 
 from pydantic import BaseModel, computed_field
 
@@ -22,6 +23,7 @@ class OrderType(StrEnum):
 
 
 ORDER_ACTION_TYPE_FIELD_NAME = "action_type"
+ORDER_RESPONSE_TYPE_FIELD_NAME = "response_type"
 
 
 class OrderActionType(StrEnum):
@@ -136,7 +138,7 @@ class OrderStateChangeReason(StrEnum):
 
 
 class OrderUpdate(OrderResponse):
-    response_type: OrderActionType = OrderActionResponseType.ORDER_UPDATE
+    response_type: OrderActionResponseType = OrderActionResponseType.ORDER_UPDATE
     order_type: OrderType
     time: int
     last_update_time: int
@@ -147,16 +149,61 @@ class OrderUpdate(OrderResponse):
 
 
 class OrderCancelUpdate(BaseModel):
-    response_type: OrderActionType = OrderActionResponseType.ORDER_CANCEL
+    response_type: OrderActionResponseType = OrderActionResponseType.ORDER_CANCEL
     sender_id: str = UNKNOWN_SENDER_ID
-    order_id: str
+    order_id: str | None = None
     client_order_id: str | None = None
     state_change_reason: OrderStateChangeReason
     is_active: bool = False
 
 
 class Fill(OrderResponse):
-    response_type: OrderActionType = OrderActionResponseType.FILL
+    response_type: OrderActionResponseType = OrderActionResponseType.FILL
     time: int
     fill_id: str
     remaining_size: Decimal
+
+
+def order_action_from_dict(
+    message: dict[str, Any],
+) -> NewOrder | CancelOrder | ModifyOrder:
+    match message[ORDER_ACTION_TYPE_FIELD_NAME]:
+        case OrderActionType.NEW_ORDER:
+            return NewOrder(**message)
+        case OrderActionType.CANCEL_ORDER:
+            return CancelOrder(**message)
+        case OrderActionType.MODIFY_ORDER:
+            return ModifyOrder(**message)
+
+    raise ValueError(
+        f"received message with unknown action type: {message[ORDER_ACTION_TYPE_FIELD_NAME]}: {message}"
+    )
+
+
+def _single_order_response_from_dict(
+    message: dict[str, Any],
+) -> OrderCancelUpdate | OrderUpdate | Fill:
+    match message[ORDER_RESPONSE_TYPE_FIELD_NAME]:
+        case OrderActionResponseType.ORDER_CANCEL:
+            return OrderCancelUpdate(**message)
+        case OrderActionResponseType.ORDER_UPDATE:
+            return OrderUpdate(**message)
+        case OrderActionResponseType.FILL:
+            return Fill(**message)
+
+    raise ValueError(
+        f"received message with unknown action type: {message[ORDER_RESPONSE_TYPE_FIELD_NAME]}: {message}"
+    )
+
+
+def order_response_from_dict(
+    message: dict[str, Any] | list[dict[str, Any]],
+) -> list[OrderUpdate] | list[OrderCancelUpdate] | list[Fill]:
+    if not isinstance(message, list):
+        return [_single_order_response_from_dict(message)]
+
+    result = []
+    for single_message in message:
+        result.append(_single_order_response_from_dict(single_message))
+
+    return result

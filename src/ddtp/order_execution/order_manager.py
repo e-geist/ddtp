@@ -25,7 +25,7 @@ class OrderManager:
         self.order_id_to_client_order_id = dict[str, str]()
         self.client_order_id_to_sender_id = dict[str, str]()
 
-    def set_sender_id_if_needed(
+    def _set_sender_id_if_needed(
         self,
         update: NewOrder | CancelOrder | ModifyOrder | OrderCancelUpdate | OrderUpdate,
     ):
@@ -53,7 +53,7 @@ class OrderManager:
         | OrderUpdate
         | Fill,
     ):
-        self.set_sender_id_if_needed(update)
+        self._set_sender_id_if_needed(update)
         match update:
             case NewOrder():
                 self.add_pending_order(update.to_order())

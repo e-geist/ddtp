@@ -6,11 +6,10 @@ from ddtp.order_execution.data import (
     Fill,
     OrderUpdate,
     OrderCancelUpdate,
-    ORDER_ACTION_TYPE_FIELD_NAME,
-    OrderActionType,
     NewOrder,
     ModifyOrder,
     CancelOrder,
+    order_action_from_dict,
 )
 from ddtp.order_execution.execution_engine_adapter import (
     AvailableExecutionEngineAdapter,
@@ -36,14 +35,9 @@ def get_on_order_action(
         if key not in clients:
             clients.add(key)
 
-        parsed_order_action: NewOrder | CancelOrder | ModifyOrder | None = None
-        match message[ORDER_ACTION_TYPE_FIELD_NAME]:
-            case OrderActionType.NEW_ORDER:
-                parsed_order_action = NewOrder(**message)
-            case OrderActionType.CANCEL_ORDER:
-                parsed_order_action = CancelOrder(**message)
-            case OrderActionType.MODIFY_ORDER:
-                parsed_order_action = ModifyOrder(**message)
+        parsed_order_action: NewOrder | CancelOrder | ModifyOrder = (
+            order_action_from_dict(message)
+        )
 
         process_action(parsed_order_action)
         order_manager_queue.put(parsed_order_action)

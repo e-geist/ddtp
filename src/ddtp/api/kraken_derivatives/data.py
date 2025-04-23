@@ -61,6 +61,7 @@ class OpenOrderType(StrEnum):
     LIMIT = "limit"
     TAKE_PROFIT = "take_profit"
     STOP = "stop"
+    UNKNOWN = ""
 
     def to_internal(self) -> OrderType:
         return {
@@ -152,7 +153,7 @@ class OpenOrder(BaseModel):
     filled: Decimal
     limit_price: Decimal | None = None
     stop_price: Decimal | None = None
-    type: OpenOrderType
+    type: OpenOrderType | None = None
     order_id: str
     cli_ord_id: str | None = None
     direction: OpenOrderDirection
