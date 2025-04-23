@@ -18,10 +18,10 @@ def process_orderbook_event(event: BookSnapshot | BookDelta):
 
     book = books.get(event.product_id)
     if not book:
-        book = Orderbook()
+        book = Orderbook(event.product_id)
         books[event.product_id] = book
     book.apply_event(event)
-    #logger.info(f"Book: {event.product_id}: {book}")
+    logger.info(f"Book: {event.product_id}: {book}")
 
 
 def process_trade_event(event: TradeSnapshot | TradeDelta):
