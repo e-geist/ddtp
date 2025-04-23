@@ -53,7 +53,14 @@ class Orderbook:
         self.asks = defaultdict(Decimal)
         self.seq = 0
 
-    def apply_snapshot(self, snapshot: BookSnapshot):
+    def apply_event(self, event: BookSnapshot | BookUpdate):
+        match event:
+            case BookUpdate():
+                self._apply_update(event)
+            case BookSnapshot():
+                self._apply_snapshot(event)
+
+    def _apply_snapshot(self, snapshot: BookSnapshot):
         self.bids.clear()
         self.asks.clear()
         self.seq = snapshot.seq
@@ -62,7 +69,7 @@ class Orderbook:
         for ask in snapshot.asks:
             self.asks[ask.price] = ask.qty
 
-    def apply_update(self, update: BookUpdate):
+    def _apply_update(self, update: BookUpdate):
         if update.seq <= self.seq:
             return  # TODO Ignore out-of-order updates
         self.seq = update.seq
