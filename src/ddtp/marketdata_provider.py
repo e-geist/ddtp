@@ -32,7 +32,7 @@ def _build_book(event: BookUpdate | BookSnapshot):
     if not book:
         book = Orderbook()
         books[event.product_id] = book
-    produce_message(event, KafkaTopics.MARKETDATA)
+    produce_message(topic=KafkaTopics.MARKETDATA, key=event.product_id, message=event)
 
     book.apply_event(event)
     logger.info(f"{event.product_id}: {book}")

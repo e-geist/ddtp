@@ -9,30 +9,14 @@ from ddtp.marketdata.data import (
     OrderBookSide,
 )
 from ddtp.order_entry.data import OrderType
+from ddtp.serialization.config import KafkaTopics
+from ddtp.serialization.consumer import consume_kafka_messages
 
 logger = logging.getLogger("main")
 
 
 def main():
-    api_key = os.getenv(KrakenApiEnvVars.API_KEY)
-    api_secret = os.getenv(KrakenApiEnvVars.API_SECRET)
-
-    rest = KrakenDerivREST(
-        os.getenv(KrakenApiEnvVars.REST_BASE_URL),
-        api_key,
-        api_secret,
-    )
-
-    sleep(10)
-    logger.info("Sending order.")
-    order_response = rest.send_order(
-        OrderType.LMT.value, "PF_ETHUSD", OrderBookSide.BUY, 1, 2200
-    )
-    logger.info(f"Order response: {order_response}")
-
-    # Infinite loop waiting for WebSocket data
-    while True:
-        pass
+    consume_kafka_messages(topic=KafkaTopics.MARKETDATA, callback=lambda x: ...)
 
 
 if __name__ == "__main__":
