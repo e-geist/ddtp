@@ -4,7 +4,7 @@ import os
 from time import sleep
 
 from ddtp.api.kraken_derivatives.rest import KrakenDerivREST
-from ddtp.config.env_vars import KrakenApi
+from ddtp.api.kraken_derivatives.config import KrakenApiEnvVars
 from ddtp.marketdata.data import (
     OrderBookSide,
 )
@@ -14,11 +14,11 @@ logger = logging.getLogger("main")
 
 
 def main():
-    api_key = os.getenv(KrakenApi.API_KEY)
-    api_secret = os.getenv(KrakenApi.API_SECRET)
+    api_key = os.getenv(KrakenApiEnvVars.API_KEY)
+    api_secret = os.getenv(KrakenApiEnvVars.API_SECRET)
 
     rest = KrakenDerivREST(
-        os.getenv(KrakenApi.REST_BASE_URL),
+        os.getenv(KrakenApiEnvVars.REST_BASE_URL),
         api_key,
         api_secret,
     )

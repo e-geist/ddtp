@@ -16,6 +16,8 @@ name = "ddtp"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [
+    { name = "kafka-python" },
+    { name = "ormsgpack" },
     { name = "pydantic" },
     { name = "python-dotenv" },
     { name = "websocket-client" },
@@ -28,6 +30,8 @@ dev = [
 
 [package.metadata]
 requires-dist = [
+    { name = "kafka-python", specifier = ">=2.1.2" },
+    { name = "ormsgpack", specifier = ">=1.8.0" },
     { name = "pydantic", specifier = ">=2.10.6" },
     { name = "python-dotenv", specifier = ">=1.0.1" },
     { name = "websocket-client", specifier = ">=1.8.0" },
@@ -35,6 +39,28 @@ requires-dist = [
 
 [package.metadata.requires-dev]
 dev = [{ name = "ruff", specifier = ">=0.9.6" }]
+
+[[package]]
+name = "kafka-python"
+version = "2.1.2"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/77/c1/4fd402aaca4263222b10410a221c64aae02824c39cc3cb9814dc84c42983/kafka_python-2.1.2.tar.gz", hash = "sha256:2a31ecfe4bb91d6009dd97593dcbe8dc7ba161accde2cb9342583a8f862abda7", size = 303233 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/4c/cd/e5629072d0c78b56f39c5bb3c3e9b96930ab3f23e13edec18a186eb02357/kafka_python-2.1.2-py2.py3-none-any.whl", hash = "sha256:446235fdce7ed5d9ff48de2c31651a85659105a8d2ac0b4abb249f7758d8cfc6", size = 274459 },
+]
+
+[[package]]
+name = "ormsgpack"
+version = "1.8.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/6c/f5/c4688728892047da27f06f4e4e7b26e1127de6f1502d861fba52801eda51/ormsgpack-1.8.0.tar.gz", hash = "sha256:77f1f3e2b8b36788114fac1005405bc8803b6aa3cf8eea5f6777d39a32141f26", size = 54714 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/b1/1a/4792c0cd3b680bd298653c7880917923fb07c194ec5d93ae55066316ba53/ormsgpack-1.8.0-cp313-cp313-macosx_10_12_x86_64.macosx_11_0_arm64.macosx_10_12_universal2.whl", hash = "sha256:b9a6abee8de942c08b6a1a8865f552d4a0202f6c5a5af11276fef3a981258f8d", size = 382817 },
+    { url = "https://files.pythonhosted.org/packages/39/d7/f9ca6e05b0492ecf8ffa95119d382140bcf3b2b547d557448691e4cd09fb/ormsgpack-1.8.0-cp313-cp313-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:7e877959efc6f3fec694123e588cbc25aafe7a07e7f92c1e7c0ad7e1cd8d1699", size = 213594 },
+    { url = "https://files.pythonhosted.org/packages/48/0d/655b675eec07e9e7e6723333d0656bf42f15ba0a8c909577f0fe203f3941/ormsgpack-1.8.0-cp313-cp313-manylinux_2_17_armv7l.manylinux2014_armv7l.whl", hash = "sha256:aa3943fd0c9f06696d8f1e56a53bd7f554df589be25bb9c4a62fc2460681052d", size = 217183 },
+    { url = "https://files.pythonhosted.org/packages/63/cb/bd116aea9a59de290e4b9b2285f16605c9abc70d13dc4e309848f7d99c37/ormsgpack-1.8.0-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:def711f17c369e5f9b4e9d3ca049d1737d4045e192e229a6eb969b6b6038689a", size = 223331 },
+    { url = "https://files.pythonhosted.org/packages/ff/ac/8ce305b886e25caeb9b663004d2042773438072711af3c9490ea91dbb25a/ormsgpack-1.8.0-cp313-cp313-win_amd64.whl", hash = "sha256:edcce43fc7ec6c83ac850e3fbe456bd292cd9f03d59faf4c1e8a8dfe43ba11eb", size = 124776 },
+]
 
 [[package]]
 name = "pydantic"

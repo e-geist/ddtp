@@ -2,7 +2,9 @@ import logging
 import os
 
 from ddtp.api.kraken_derivatives.websocket import KrakenDerivWebSocket
-from ddtp.config.env_vars import KrakenApi
+from ddtp.api.kraken_derivatives.config import KrakenApiEnvVars
+from ddtp.serialization.config import KafkaTopics
+from ddtp.serialization.producer import produce_message
 from ddtp.marketdata.data import Orderbook, BookSubscribed, BookSnapshot, BookUpdate
 
 books = dict[str, Orderbook]()
@@ -30,23 +32,24 @@ def _build_book(event: BookUpdate | BookSnapshot):
     if not book:
         book = Orderbook()
         books[event.product_id] = book
+    produce_message(event, KafkaTopics.MARKETDATA)
 
     book.apply_event(event)
     logger.info(f"{event.product_id}: {book}")
 
 def main():
-    api_key = os.getenv(KrakenApi.API_KEY)
-    api_secret = os.getenv(KrakenApi.API_SECRET)
+    api_key = os.getenv(KrakenApiEnvVars.API_KEY)
+    api_secret = os.getenv(KrakenApiEnvVars.API_SECRET)
 
     # Connect to WebSocket API and subscribe to trade feed for XBT/USD and XRP/USD
     ws = KrakenDerivWebSocket(
-        os.getenv(KrakenApi.WS_BASE_URL),
+        os.getenv(KrakenApiEnvVars.WS_BASE_URL),
         _on_message_handler,
         api_key,
         api_secret,
     )
-    # ws.subscribe_public("book", ["PI_XBTUSD", "PI_ETHUSD"])
-    ws.subscribe_private("open_orders")
+    ws.subscribe_public("book", ["PI_XBTUSD", "PI_ETHUSD"])
+    # ws.subscribe_private("open_orders")
 
     while True:
         pass
