@@ -204,8 +204,7 @@ most exchanges have a simulation environment, that can be used for testing - als
 def subscribe_orderbook_data(
     *,
     product_ids: set[str],
-    on_trade: Callable[[TradeSnapshot | TradeDelta], None],
-    on_orderbook_event: Callable[[BookSnapshot | BookDelta], None],
+    queue: mp.Queue,
 ):
     ...
 ```
@@ -254,16 +253,15 @@ def send_modify_order_to_execution_engine(
     stop_price: Decimal | None = None,
 ):
     ...
-
-
-
-
-
-
-
-
-
-
+```
+subscription to feedback for orders
+```python
+def subscribe_order_feedback_data(
+    *,
+    sender_id: str,
+    queue: mp.Queue,
+):
+    ...
 ```
 :::
 ::::::::::::::
