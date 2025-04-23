@@ -18,7 +18,7 @@ Different requirements for different use-cases.
 
 ## Communication between decoupled system components
 - De-/Serialization speed: very import -> how fast can it be processed?
-- Storage size: mid important -> how much space does it take up in RAM + via network communication
+- Data size: mid important -> how much space does it take up in RAM + via network communication
 - Standardized protocol: depends -> is the techstack rather broad or narrow? support for many languages needed?
 
 *Decision*: **msgpack** due to better language support for Python + decision against gRPC (otherwise protobuf
@@ -57,13 +57,13 @@ Rather big data volume: recorded market data
 Rather small data volume: compliance data (sent orders, trades)
 
 - De-/Serialization speed: mid for recorded data (analysis) / not important for compliance data
-- Storage size: very import for recorded data, because of huge volume / mid for compliance data
+- Data size: very import for recorded data, because of huge volume / mid for compliance data
 - Standardized protocol: important to enable analysis + evaluation via different systems
 
 
-*Decision*: De-facto standard **parquet** due to very good support in all systems, versatility, space and speed.
-On top of parquet of course some table-format can (and probably should!) be used, like Apache Iceberg or Delta Lake.
-As this is a demo project, these were omitted.
+*Decision*: De-facto standard [**parquet**](https://parquet.apache.org/) due to very good support in all systems, 
+versatility, space and speed. On top of parquet of course some table-format can (and probably should!) be used, 
+like Apache Iceberg or Delta Lake. As this is a demo project, these were omitted.
 
 # Resources
 - https://medium.com/@hugovs/the-need-for-speed-experimenting-with-message-serialization-93d7562b16e4
@@ -72,3 +72,4 @@ As this is a demo project, these were omitted.
 - https://flatbuffers.dev/benchmarks/
 - https://msgpack.org/
 - https://github.com/aviramha/ormsgpack
+- https://parquet.apache.org/
