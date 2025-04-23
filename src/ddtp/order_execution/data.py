@@ -8,6 +8,8 @@ from pydantic import BaseModel, computed_field
 
 from ddtp.marketdata.data import OrderbookSide
 
+UNKNOWN_SENDER_ID = "UNKNOWN"
+
 
 class OrderType(StrEnum):
     LMT = "lmt"
@@ -38,6 +40,7 @@ class OrderState(StrEnum):
 
 
 class Order(BaseModel):
+    sender_id: str = UNKNOWN_SENDER_ID
     order_id: str
     product_id: str
     state: OrderState
@@ -56,7 +59,7 @@ class Order(BaseModel):
 
 class OrderBase(BaseModel):
     action_type: OrderActionType
-    sender_identifier: str
+    sender_id: str = UNKNOWN_SENDER_ID
     product_id: str
     client_order_id: str | None = None
 
@@ -71,6 +74,7 @@ class NewOrder(OrderBase):
 
     def to_order(self) -> Order:
         return Order(
+            sender_id=self.sender_id,
             order_id=self.client_order_id,
             product_id=self.product_id,
             state=OrderState.ACTIVE_PENDING,
@@ -85,7 +89,7 @@ class NewOrder(OrderBase):
 
 class CancelOrder(OrderBase):
     action_type: OrderActionType = OrderActionType.CANCEL_ORDER
-    order_id: str | None
+    order_id: str | None = None
 
 
 class ModifyOrder(OrderBase):
@@ -95,3 +99,64 @@ class ModifyOrder(OrderBase):
     size: Decimal | None = None
     limit_price: Decimal | None = None
     stop_price: Decimal | None = None
+
+
+class OrderActionResponseType(StrEnum):
+    FILL = "fill"
+    ORDER_UPDATE = "order_state"
+    ORDER_CANCEL = "order_cancel"
+
+
+class OrderResponse(BaseModel):
+    response_type: OrderActionType
+    sender_id: str = UNKNOWN_SENDER_ID
+    product_id: str
+    client_order_id: str | None = None
+    order_id: str
+    side: OrderbookSide
+    size: Decimal
+    price: Decimal
+
+
+class OrderStateChangeReason(StrEnum):
+    PARTIAL_FILL = "partial_fill"
+    FILL = "fill"
+    NEW_ORDER = "new_order"
+    ORDER_FOR_MODIFY_NOT_FOUND = "order_for_modiy_not_found"
+    OWN_CANCEL = "cancelled_by_user"
+    CONTRACT_EXPIRED = "contract_expired"
+    INSUFFICIENT_MARGIN = "insufficient_margin"
+    MARKET_INACTIVE = "market_inactive"
+    CANCELLED_BY_ADMIN = "cancelled_by_admin"
+    IOC_ORDER_FAIL = "ioc_order_failed"
+    POST_ORDER_FAIL = "post_order_failed"
+    WOULD_EXECUTE_SELF = "would_execute_self"
+    WOULD_NOT_REDUCE_POSITION = "would_not_reduce_position"
+    MISC = "misc"
+
+
+class OrderUpdate(OrderResponse):
+    response_type: OrderActionType = OrderActionResponseType.ORDER_UPDATE
+    order_type: OrderType
+    time: int
+    last_update_time: int
+    filled: Decimal | None = None
+    stop_price: Decimal | None = None
+    is_active: bool = True
+    state_change_reason: OrderStateChangeReason | None = None
+
+
+class OrderCancelUpdate(BaseModel):
+    response_type: OrderActionType = OrderActionResponseType.ORDER_CANCEL
+    sender_id: str = UNKNOWN_SENDER_ID
+    order_id: str
+    client_order_id: str | None = None
+    state_change_reason: OrderStateChangeReason
+    is_active: bool = False
+
+
+class Fill(OrderResponse):
+    response_type: OrderActionType = OrderActionResponseType.FILL
+    time: int
+    fill_id: str
+    remaining_size: Decimal

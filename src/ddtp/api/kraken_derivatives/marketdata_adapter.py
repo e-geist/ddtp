@@ -11,9 +11,13 @@ from ddtp.api.kraken_derivatives.config import KrakenApiEnvVars
 from ddtp.marketdata.data import (
     BookSnapshot,
     BookDelta,
-    FeedType,
     TradeDelta,
     TradeSnapshot,
+)
+from ddtp.api.kraken_derivatives.data import (
+    FeedType,
+    WS_MESSAGES_FEED_FIELD,
+    WS_MESSAGES_EVENT_FIELD,
 )
 
 logger = logging.getLogger(__name__)
@@ -23,10 +27,11 @@ def _get_marketdata_parser(queue: Queue) -> Callable[[dict[str, Any]], None]:
     def parse_marketdata_event(
         event: dict[str, Any],
     ):
-        if "event" in event:
+        if WS_MESSAGES_EVENT_FIELD in event:
             return
         parsed_event = None
-        match event["feed"]:
+        feed = event.pop(WS_MESSAGES_FEED_FIELD)
+        match feed:
             case FeedType.BOOK:
                 parsed_event = BookDelta(**event)
             case FeedType.BOOK_SNAPSHOT:

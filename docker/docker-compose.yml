@@ -1,3 +1,4 @@
+name: ddtp
 services:
   kafka:
     image: apache/kafka

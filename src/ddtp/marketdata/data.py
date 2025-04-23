@@ -5,7 +5,7 @@ from typing import Optional, Any
 from pydantic import BaseModel
 
 
-class FeedType(StrEnum):
+class MessageType(StrEnum):
     BOOK_SNAPSHOT = "book_snapshot"
     BOOK = "book"
     TRADE = "trade"
@@ -30,7 +30,7 @@ class OrderBookEntry(BaseModel):
 
 
 class BaseMessage(BaseModel):
-    feed: FeedType
+    message_type: MessageType
 
 
 class MarketdataSubscribed(BaseMessage):
@@ -45,14 +45,14 @@ class BookBase(BaseMessage):
 
 
 class BookSnapshot(BookBase):
-    feed: FeedType = FeedType.BOOK_SNAPSHOT
+    message_type: MessageType = MessageType.BOOK_SNAPSHOT
     tickSize: Optional[Decimal]
     bids: list[OrderBookEntry]
     asks: list[OrderBookEntry]
 
 
 class BookDelta(BookBase):
-    feed: FeedType = FeedType.BOOK
+    message_type: MessageType = MessageType.BOOK
     side: OrderbookSide
     price: Decimal
     qty: Decimal
@@ -73,26 +73,28 @@ class TradeData(BaseModel):
 
 
 class TradeSnapshot(TradeBase):
-    feed: FeedType = FeedType.TRADE_SNAPSHOT
+    message_type: MessageType = MessageType.TRADE_SNAPSHOT
     trades: list[TradeData]
 
 
 class TradeDelta(TradeBase, TradeData):
-    feed: FeedType = FeedType.TRADE
-    pass
+    message_type: MessageType = MessageType.TRADE
+
+
+MARKETDATA_MESSAGE_TYPE_NAME = "message_type"
 
 
 def book_event_from_dict(
     event: dict[str, Any],
 ) -> BookSnapshot | BookDelta | TradeSnapshot | TradeDelta:
-    match event["feed"]:
-        case FeedType.BOOK:
+    match event[MARKETDATA_MESSAGE_TYPE_NAME]:
+        case MessageType.BOOK:
             return BookDelta(**event)
-        case FeedType.BOOK_SNAPSHOT:
+        case MessageType.BOOK_SNAPSHOT:
             return BookSnapshot(**event)
-        case FeedType.TRADE:
+        case MessageType.TRADE:
             return TradeDelta(**event)
-        case FeedType.TRADE_SNAPSHOT:
+        case MessageType.TRADE_SNAPSHOT:
             return TradeSnapshot(**event)
 
     raise TypeError(f"unknown event: {event}")
