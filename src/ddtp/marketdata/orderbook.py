@@ -65,9 +65,9 @@ class Orderbook:
         self.last_update = delta.timestamp
 
         side_to_modify = self.bids if delta.side == OrderbookSide.BUY else self.asks
-        if delta.qty == 0 and delta.price in side_to_modify:
+        if delta.qty == Decimal("0") and delta.price in side_to_modify:
             del side_to_modify[delta.price]
-        else:
+        elif delta.qty > Decimal("0"):
             side_to_modify[delta.price] = delta.qty
 
     def get_best_bid(self) -> (Decimal, Decimal):

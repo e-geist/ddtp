@@ -19,10 +19,10 @@ from ddtp.serialization.config import KafkaTopics
 from ddtp.serialization.consumer import consume_kafka_messages
 from ddtp.serialization.producer import produce_message
 
-logger = logging.getLogger("order_execution_engine")
-
-
-clients = set[str]()
+USED_ADAPTER = AvailableExecutionEngineAdapter.KRAKEN_DERIVATIVES
+COMPONENT_NAME = "order_execution_engine"
+IDENTIFIER = f"{COMPONENT_NAME}_{USED_ADAPTER.name}"
+logger = logging.getLogger(IDENTIFIER)
 
 order_manager = OrderManager()
 
@@ -32,15 +32,13 @@ def get_on_order_action(
     process_action: Callable[[NewOrder | CancelOrder | ModifyOrder], None],
 ):
     def on_order_action(key: str, message: dict[str, Any], timestamp: int):
-        if key not in clients:
-            clients.add(key)
-
         parsed_order_action: NewOrder | CancelOrder | ModifyOrder = (
             order_action_from_dict(message)
         )
-
-        process_action(parsed_order_action)
+        logging.info(f"processing order action: {parsed_order_action}")
         order_manager_queue.put(parsed_order_action)
+        process_action(parsed_order_action)
+
 
     return on_order_action
 
@@ -57,22 +55,13 @@ def _send_kafka_responses(queue: mp.Queue):
         )
 
 
-def read_events(read_queue: mp.Queue, send_kafka: mp.Queue):
-    while True:
-        event = read_queue.get()
-        order_manager.process_updates(event)
-        match event:
-            case list():
-                send_kafka.put(event)
-
-
 def main():
     logger.info("Starting execution engine")
     send_message_queue = mp.Queue()
     order_manager_queue = mp.Queue()
 
     start_feedback_data_receival, send_order_action = (
-        AvailableExecutionEngineAdapter.KRAKEN_DERIVATIVES.value
+        USED_ADAPTER.value
     )
 
     receive_feedback_process = mp.Process(
@@ -92,11 +81,18 @@ def main():
         kwargs={
             "topic": KafkaTopics.ORDER_ENTRY,
             "callback": get_on_order_action(order_manager_queue, send_order_action),
+            "group_id": IDENTIFIER,
+            "client_id": IDENTIFIER,
         },
     )
     receive_order_actions.start()
 
-    read_events(order_manager_queue, send_message_queue)
+    while send_kafka_process.is_alive() and receive_order_actions.is_alive() and receive_feedback_process.is_alive():
+        event = order_manager_queue.get()
+        order_manager.process_updates(event)
+        match event:
+            case list():
+                send_message_queue.put(event)
 
 
 if __name__ == "__main__":

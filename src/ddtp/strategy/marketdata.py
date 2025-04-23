@@ -9,6 +9,7 @@ from ddtp.serialization.consumer import consume_kafka_messages
 
 def subscribe_orderbook_data(
     *,
+    receiver_id: str,
     product_ids: set[str],
     queue: mp.Queue,
 ):
@@ -20,5 +21,8 @@ def subscribe_orderbook_data(
         queue.put(converted_event)
 
     consume_kafka_messages(
-        topic=KafkaTopics.MARKETDATA, callback=consume_orderbook_event
+        topic=KafkaTopics.MARKETDATA,
+        callback=consume_orderbook_event,
+        group_id=receiver_id,
+        client_id=receiver_id,
     )

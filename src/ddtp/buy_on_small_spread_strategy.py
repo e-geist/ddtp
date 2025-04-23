@@ -10,13 +10,20 @@ from ddtp.marketdata.data import (
     OrderbookSide,
 )
 from ddtp.marketdata.orderbook import Orderbook
-from ddtp.order_execution.data import OrderType, Fill, OrderCancelUpdate, OrderUpdate, OrderState
+from ddtp.order_execution.data import (
+    OrderType,
+    Fill,
+    OrderCancelUpdate,
+    OrderUpdate,
+    OrderState,
+)
 from ddtp.order_execution.order_manager import OrderManager
 from ddtp.strategy.marketdata import subscribe_orderbook_data
 from ddtp.strategy.order_execution import (
     send_new_order_to_execution_engine,
     send_cancel_order_to_execution_engine,
-    subscribe_order_feedback_data, send_modify_order_to_execution_engine,
+    subscribe_order_feedback_data,
+    send_modify_order_to_execution_engine,
 )
 
 logger = logging.getLogger("strategy")
@@ -30,13 +37,24 @@ order_manager: OrderManager = OrderManager()
 position: Decimal = Decimal("0")
 latest_client_order_id: str | None = None
 
+
 def update_positions(fills: list[Fill]):
     global position
 
     for fill in fills:
+        logger.info(f"received {fill.side.name} fill for order={fill.client_order_id} with {fill.size}@{fill.price}")
         position += fill.size if fill.side == OrderbookSide.BUY else -fill.size
 
-def process_message(message: BookSnapshot | BookDelta | TradeSnapshot | TradeDelta | list[Fill] | list[OrderUpdate] | list[OrderCancelUpdate]):
+
+def process_message(
+    message: BookSnapshot
+    | BookDelta
+    | TradeSnapshot
+    | TradeDelta
+    | list[Fill]
+    | list[OrderUpdate]
+    | list[OrderCancelUpdate],
+):
     match message:
         case BookSnapshot() | BookDelta():
             process_orderbook_event(message)
@@ -47,9 +65,11 @@ def process_message(message: BookSnapshot | BookDelta | TradeSnapshot | TradeDel
             if message and isinstance(message[0], Fill):
                 update_positions(message)
 
+
 def process_orderbook_event(event: BookSnapshot | BookDelta):
+    book_was_initialized_before = book.is_initialized
     book.apply_event(event)
-    if not book.is_initialized:
+    if not book.is_initialized or (book_was_initialized_before and isinstance(event, BookSnapshot)):
         return
 
     logger.debug(f"Book: {event.product_id}: {book}")
@@ -66,17 +86,19 @@ def process_orderbook_event(event: BookSnapshot | BookDelta):
         return  # spread too big -> we don't want to place new orders
 
     if best_bid[1] == Decimal("0") or best_ask[1] == Decimal("0"):
-        return # don't trade on an inactive book
+        return  # don't trade on an inactive book
 
     if position < Decimal("10"):
         side = OrderbookSide.BUY
-        price = best_bid[0] + Decimal("100")
+        price = best_bid_price - Decimal("500")
     else:
         side = OrderbookSide.SELL
-        price = best_ask[0] - Decimal("100")
+        price = best_ask_price + Decimal("500")
 
     global latest_client_order_id
-    existing_order = order_manager.get_active_order(client_order_id=latest_client_order_id)
+    existing_order = order_manager.get_active_order(
+        client_order_id=latest_client_order_id
+    )
     if existing_order is None:
         sent_new_order = send_new_order_to_execution_engine(
             sender_id=SENDER_ID,
@@ -91,7 +113,13 @@ def process_orderbook_event(event: BookSnapshot | BookDelta):
         return
 
     if existing_order.state != OrderState.ACTIVE:
-        return # don't do anything if operations are pending
+        return  # don't do anything if operations are pending
+
+    # only react if top of book changed
+    if event.side == OrderbookSide.BUY and event.price < best_bid_price:
+        return
+    elif event.price > best_ask_price:
+        return
 
     # side cannot be modified -> cancel and place new order
     if existing_order.side != side:
@@ -118,7 +146,7 @@ def process_orderbook_event(event: BookSnapshot | BookDelta):
             sender_id=SENDER_ID,
             client_order_id=latest_client_order_id,
             product_id=book.product_id,
-            limit_price=price
+            limit_price=price,
         )
         order_manager.process_update(sent_modify_order)
 
@@ -133,7 +161,7 @@ def main():
 
     receive_marketdata = mp.Process(
         target=subscribe_orderbook_data,
-        kwargs={"product_ids": {TRADED_INSTRUMENT}, "queue": data_queue},
+        kwargs={"receiver_id": SENDER_ID, "product_ids": {TRADED_INSTRUMENT}, "queue": data_queue},
     )
     receive_marketdata.start()
 
@@ -144,7 +172,7 @@ def main():
     receive_order_feedback.start()
 
     try:
-        while True:
+        while receive_marketdata.is_alive() and receive_order_feedback.is_alive():
             message = data_queue.get()
             process_message(message)
     except KeyboardInterrupt:

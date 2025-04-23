@@ -38,9 +38,7 @@ def send_new_order_to_execution_engine(
         limit_price=limit_price,
         stop_price=stop_price,
     )
-    produce_message(
-        topic=KafkaTopics.ORDER_ENTRY, key=sender_id, message=new_order
-    )
+    produce_message(topic=KafkaTopics.ORDER_ENTRY, key=sender_id, message=new_order)
     return new_order
 
 
@@ -57,9 +55,7 @@ def send_cancel_order_to_execution_engine(
         client_order_id=client_order_id,
         order_id=order_id,
     )
-    produce_message(
-        topic=KafkaTopics.ORDER_ENTRY, key=sender_id, message=cancel_order
-    )
+    produce_message(topic=KafkaTopics.ORDER_ENTRY, key=sender_id, message=cancel_order)
     return cancel_order
 
 
@@ -84,9 +80,7 @@ def send_modify_order_to_execution_engine(
         limit_price=limit_price,
         stop_price=stop_price,
     )
-    produce_message(
-        topic=KafkaTopics.ORDER_ENTRY, key=sender_id, message=modify_order
-    )
+    produce_message(topic=KafkaTopics.ORDER_ENTRY, key=sender_id, message=modify_order)
 
     return modify_order
 
@@ -107,5 +101,8 @@ def subscribe_order_feedback_data(
         queue.put(converted_event)
 
     consume_kafka_messages(
-        topic=KafkaTopics.ORDER_ENTRY_FEEDBACK, callback=consume_order_feedback_event
+        topic=KafkaTopics.ORDER_ENTRY_FEEDBACK,
+        callback=consume_order_feedback_event,
+        client_id=sender_id,
+        group_id=sender_id,
     )

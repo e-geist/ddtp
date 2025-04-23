@@ -34,7 +34,7 @@ class OrderManager:
 
         order_id_to_use = self.order_id_to_client_order_id.get(update.order_id)
         match update:
-            case NewOrder() | ModifyOrder() | OrderUpdate() | CancelOrder() if (
+            case NewOrder() | ModifyOrder() | OrderUpdate() | CancelOrder() | Fill() if (
                 update.client_order_id
             ):
                 order_id_to_use = update.client_order_id
@@ -161,6 +161,7 @@ class OrderManager:
         if client_order_id:
             order_id_to_use = client_order_id
             if order_id and (client_order_id not in self.order_id_to_client_order_id):
+                # save mapping for later use
                 self.order_id_to_client_order_id[order_id] = client_order_id
         else:
             order_id_to_use = self.order_id_to_client_order_id.get(order_id)

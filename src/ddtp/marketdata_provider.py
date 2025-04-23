@@ -31,6 +31,7 @@ def marketdata_loop(marketdata_process: mp.Process, marketdata_queue: mp.Queue):
                 difference_to_last_sent_snapshot = (
                     event.seq - sent_snapshots[event.product_id]
                 )
+
                 # sending all x messages a snapshot in case clients
                 # disconnect, so they don't need to read from the beginning
                 if difference_to_last_sent_snapshot > 400:
