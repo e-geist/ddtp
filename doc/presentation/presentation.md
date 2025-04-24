@@ -16,8 +16,8 @@ author: Eugen Geist
   - ~5 years of experience in exchange trading
   - other industries: infrastructure, automotive, logistics
 - contact 
-  - [mail@eugengeist.com](mail@eugengeist.com)
-  - [linkedin.com/in/eugen-geist/](linkedin.com/in/eugen-geist/)
+  - [mail@eugengeist.com](mailto:mail@eugengeist.com)
+  - [https://linkedin.com/in/eugen-geist/](https://linkedin.com/in/eugen-geist/)
 :::
 ::::::::::::::
 
@@ -890,4 +890,10 @@ outside of live trading
 # thank you for listening!
 
 # repo
-![https://github.com/e-geist/ddtp](img/qrcode_github.png)
+![[https://github.com/e-geist/ddtp](https://github.com/e-geist/ddtp)](img/qrcode_github.png)
+
+Contact:
+
+[mail@eugengeist.com](mailto:mail@eugengeist.com)
+
+[https://linkedin.com/in/eugen-geist/](https://linkedin.com/in/eugen-geist/)
