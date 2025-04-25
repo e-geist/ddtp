@@ -4,12 +4,12 @@ date: 2024-04-24
 author: Eugen Geist
 ---
 
-# {background-image="img/front.png" background-size=95%}
+# {background-image="doc/presentation/img/front.png" background-size=95%}
 
 # about me
 :::::::::::::: {.columns}
 ::: {.column width="50%"}
-![](img/me.jpg){width=75%}
+![](doc/presentation/img/me.jpg){width=75%}
 :::
 ::: {.column width="50%"}
 - Software and Data Engineering Freelancer
@@ -89,7 +89,7 @@ author: Eugen Geist
 
 ---
 
-![](img/orderbook_btc_usd.jpg)
+![](doc/presentation/img/orderbook_btc_usd.jpg)
 
 ## trades and positions
 - **trade**: an order that was *executed* ➡️ somebody else matched your order and you actually bought/sold a good
@@ -148,7 +148,7 @@ I need for being sufficiently fast to
 
 ---
 
-![](img/high_level_architecture.png){ width=80% }
+![](doc/presentation/img/high_level_architecture.png){ width=80% }
 
 # disclaimer
 
@@ -171,7 +171,7 @@ most exchanges have a simulation environment, that can be used for testing - als
 
 ---
 
-![](img/high_level_architecture_strategies.png){ width=80% }
+![](doc/presentation/img/high_level_architecture_strategies.png){ width=80% }
 
 ---
 
@@ -270,7 +270,7 @@ def subscribe_order_feedback_data(
 
 --- 
 
-![](img/high_level_architecture_serialization_communication.png){ width=80% }
+![](doc/presentation/img/high_level_architecture_serialization_communication.png){ width=80% }
 
 ---
 
@@ -367,7 +367,7 @@ possible candidates
 
 ## resulting architecture
 
-![[^12]](img/high_level_architecture_kafka.png){ width=80% }
+![[^12]](doc/presentation/img/high_level_architecture_kafka.png){ width=80% }
 
 [^12]: _[kafka logo, accessed 2025-04-13 17:51](https://de.m.wikipedia.org/wiki/Datei:Apache_Kafka_logo.svg)_
 
@@ -376,7 +376,7 @@ possible candidates
 
 ---
 
-![](img/high_level_architecture_marketdata.png){ width=80% }
+![](doc/presentation/img/high_level_architecture_marketdata.png){ width=80% }
 
 ---
 
@@ -395,7 +395,7 @@ possible candidates
 
 ---
 
-![](img/orderbook_btc_usd.jpg)
+![](doc/presentation/img/orderbook_btc_usd.jpg)
 
 ## marketdata ingestion
 
@@ -559,7 +559,7 @@ class BookDelta(BookBase):
 
 ---
 
-![](img/high_level_architecture_order_execution.png){ width=80% }
+![](doc/presentation/img/high_level_architecture_order_execution.png){ width=80% }
 
 ---
 
@@ -767,7 +767,7 @@ class Fill(OrderResponse):
 
 ---
 
-![](img/high_level_architecture_storage_and_analysis.png){ width=80% }
+![](doc/presentation/img/high_level_architecture_storage_and_analysis.png){ width=80% }
 
 ---
 
@@ -890,7 +890,7 @@ outside of live trading
 # thank you for listening!
 
 # repo
-![[https://github.com/e-geist/ddtp](https://github.com/e-geist/ddtp)](img/qrcode_github.png)
+![[https://github.com/e-geist/ddtp](https://github.com/e-geist/ddtp)](doc/presentation/img/qrcode_github.png)
 
 Contact:
 
